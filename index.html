@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Startup Run 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<!-- HANDOFF: read HANDOFF.md first. Section markers "MODULE n" map to the future file split. -->
+<style>
+/* 1. Reset & Fullscreen Canvas Styles */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#1b1530;font-family:Inter,Arial,sans-serif;color:#111}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+:root{--ink:#111;--paper:#fff6d6;--buff:#22ff88;--debuff:#ff3355;--trade:#ffd21f;--pop:#ff7ad9}
+
+/* 2. Comic Panel Overlay & Cutscene Speech Bubbles */
+#panel{position:fixed;inset:10px;border:10px solid var(--ink);pointer-events:none;z-index:5;box-shadow:inset 0 0 0 3px var(--paper)}
+.ui{position:fixed;z-index:10}
+.hidden{display:none!important}
+.modal{inset:0;display:flex;align-items:center;justify-content:center;background:rgba(20,10,40,.55)}
+.card{background:var(--paper);border:6px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:28px 34px;max-width:480px;width:90%;text-align:center}
+.card h1{font-family:Bangers,cursive;font-size:3rem;letter-spacing:2px;color:var(--pop);-webkit-text-stroke:2px var(--ink);text-shadow:4px 4px 0 var(--ink)}
+.card h2{font-family:Bangers,cursive;font-size:2rem;letter-spacing:1px;margin-bottom:8px}
+.card p{margin:10px 0 16px;font-weight:500}
+input{width:100%;padding:12px;font:700 1.1rem Inter;border:4px solid var(--ink);background:#fff;margin-bottom:16px;text-align:center}
+button{font:400 1.6rem Bangers,cursive;letter-spacing:1px;padding:10px 26px;border:4px solid var(--ink);background:var(--trade);box-shadow:5px 5px 0 var(--ink);cursor:pointer}
+button:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink)}
+#subtitle{left:50%;bottom:48px;transform:translateX(-50%);width:min(760px,88%);background:var(--paper);border:5px solid var(--ink);box-shadow:7px 7px 0 var(--ink);padding:16px 20px;font-weight:700;line-height:1.4;text-align:center}
+#subtitle button{display:block;margin:14px auto 0}
+
+/* 3. HUD (Balance, Timer) & Leaderboard Modal Styling */
+#hud{inset:24px 24px auto 24px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;font-family:Bangers,cursive;text-shadow:3px 3px 0 var(--ink);color:#fff}
+#hud .box{background:rgba(17,17,17,.75);border:4px solid var(--ink);padding:6px 14px;font-size:1.5rem;letter-spacing:1px}
+#timer{font-size:2rem!important;background:var(--pop)!important}
+#bal.low{color:var(--debuff)}
+#sub{font-size:1rem!important;opacity:.9}
+#toast{left:50%;top:38%;transform:translate(-50%,-50%);font:400 2.6rem Bangers,cursive;color:#fff;-webkit-text-stroke:2px var(--ink);text-shadow:5px 5px 0 var(--ink);pointer-events:none;opacity:0;transition:opacity .25s}
+#toast.show{opacity:1}
+table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:.9rem;text-align:left}
+th,td{padding:4px 6px;border-bottom:2px solid var(--ink)}
+tr.me{background:var(--trade);font-weight:700}
+
+.card button{display:block;margin:10px auto;min-width:220px}
+.bar{position:fixed;left:0;right:0;height:9vh;background:#000;z-index:6;transition:height 1s;pointer-events:none}
+#barT{top:0}#barB{bottom:0}body.run .bar{height:0}
+#fade{position:fixed;inset:0;background:#000;z-index:7;pointer-events:none;opacity:1}
+#subtitle{bottom:11vh}
+#menu{background:linear-gradient(90deg,rgba(15,8,35,.75),transparent 70%);justify-content:flex-start;padding-left:8vw}
+</style>
+</head>
+<body>
+<div id="panel"></div>
+
+<!-- HTML UI: Naming Modal, Comic Speech Subtitle Box, HUD, Game Over Screen -->
+<div class="bar" id="barT"></div><div class="bar" id="barB"></div><div id="fade"></div>
+<div id="menu" class="ui modal"><div class="card"><h1>STARTUP RUN 3D</h1><p>Keep your company alive. Pick the right gate.</p>
+  <button id="startBtn">Start Game</button><button id="scoresBtn">High Scores</button></div></div>
+<div id="scoresModal" class="ui modal hidden"><div class="card"><h2>HIGH SCORES</h2><table id="board2"></table><button id="backBtn">Back</button></div></div>
+<div id="nameModal" class="ui modal hidden"><div class="card">
+  <h2>NEW STARTUP</h2>
+  <p>Enter Your Startup Name:</p>
+  <input id="nameInput" placeholder="Unicorn AI Corp" maxlength="28">
+  <button id="launchBtn">Launch Startup</button>
+</div></div>
+
+<div id="subtitle" class="ui hidden"><span id="subText"></span><button id="runBtn" class="hidden">Start Running</button></div>
+
+<div id="hud" class="ui hidden">
+  <div class="box" id="bal">$50,000</div>
+  <div style="text-align:center"><div class="box" id="timer">SURVIVAL TIME: 00:00</div><div class="box" id="sub"></div></div>
+  <div class="box" id="burn">-$1,000/s</div>
+</div>
+<div id="toast" class="ui"></div>
+
+<div id="overModal" class="ui modal hidden"><div class="card">
+  <h2>BANKRUPT!</h2>
+  <p id="overText"></p>
+  <table id="board"></table>
+  <button id="againBtn">Main Menu</button>
+</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* =========================================================
+   MODULE 1: Game State Variables  (-> future js/gameplay.js)
+   ========================================================= */
+const CFG = {
+  startBalance: 50000, baseBurn: 1000, burnGrowthPerMin: 1.0, // burn grows +100% per minute
+  baseSpeed: 16, speedStep: 1.02, speedEvery: 10,             // +2% every 10s
+  lanes: [-3.2, 0, 3.2], gateSpacing: 60, policeHold: 4, firstGate: 70, storeKey: 'startupRun3D_top10'
+};
+const G = {
+  phase: 'menu', companyName: 'Unicorn AI Corp', balance: CFG.startBalance, time: 0,
+  burnMult: 1, income: 0, vy: 0, air: false, slide: 0, hold: 0, stun: 0, shake: 0, lane: 1, speedMult: 1, nextGateZ: 0, dist: 0, highScores: []
+};
+// Gate matrix (spec section 6). v0.2: gates are visually IDENTICAL; player reads only the simple title.
+// "type" is internal only (used by the pair rule), never shown.
+const GATES = [
+  {type:'buff',  title:'Get Funding',  apply:()=>{G.balance+=25000; return '+$25,000';}},
+  {type:'buff',  title:'Go Viral',     apply:()=>{G.balance+=15000; G.burnMult*=0.9; return '+$15,000 and Burn -10%';}},
+  {type:'debuff',title:'Server Crash', apply:()=>{G.balance-=20000; return '-$20,000';}},
+  {type:'debuff',title:'Tax Audit',    apply:()=>{G.balance-=35000; return '-$35,000';}},
+  {type:'trade', title:'Hire Expert',  apply:()=>{G.balance-=10000; G.income+=500; return '-$10,000 now, +$500/s';}}
+];
+const $ = id => document.getElementById(id);
+const fmt = n => (n<0?'-':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
+const mmss = s => String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0');
+
+/* =========================================================
+   MODULE 2: Three.js Setup  (-> future js/scene.js)
+   ========================================================= */
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x7fd6ff);
+scene.fog = new THREE.Fog(0x7fd6ff, 40, 150);
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 300);
+// Toon lighting
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8866aa, 0.8));
+const sun = new THREE.DirectionalLight(0xffffff, 0.9); sun.position.set(6,12,8); scene.add(sun);
+const toon = (c) => new THREE.MeshToonMaterial({color:c});
+// Comic outline: back-face scaled black mesh. Call on any mesh.
+function outline(mesh, t=1.06){
+  const o = new THREE.Mesh(mesh.geometry, new THREE.MeshBasicMaterial({color:0x111111, side:THREE.BackSide}));
+  o.scale.setScalar(t); mesh.add(o); return mesh;
+}
+function box(w,h,d,c,x=0,y=0,z=0,parent=scene){
+  const m = outline(new THREE.Mesh(new THREE.BoxGeometry(w,h,d), toon(c)),1.04);
+  m.position.set(x,y,z); parent.add(m); return m;
+}
+
+// ---- Human builder (-> future js/character.js) ----
+function makeHuman(o){ // organic, rounded body: ellipsoid chest/hips, tapered limbs, ball joints, round shoes
+  const g=new THREE.Group(), d=o.dir||1, S=r=>new THREE.SphereGeometry(r,16,12);
+  const add=(geo,c,x,y,z,p=g,sc)=>{const m=outline(new THREE.Mesh(geo,toon(c)),1.07);m.position.set(x,y,z);if(sc)m.scale.set(sc[0],sc[1],sc[2]);p.add(m);return m;};
+  add(S(1),o.shirt,0,1.58,0,g,[0.5,0.6,0.33]); add(S(1),o.shirt,0,1.2,0,g,[0.4,0.36,0.29]); add(S(1),o.pants,0,0.98,0,g,[0.42,0.26,0.3]);
+  add(new THREE.CylinderGeometry(0.09,0.11,0.2,10),o.skin,0,2.1,0);
+  add(S(0.34),o.skin,0,2.45,0,g,[1,1.1,1]);
+  add(new THREE.SphereGeometry(0.37,16,8,0,Math.PI*2,0,Math.PI*0.5),o.hair,0,2.5,-0.05*d);
+  [-0.12,0.12].forEach(x=>add(S(0.045),0x111111,x,2.47,0.3*d)); add(S(0.06),o.skin,0,2.4,0.34*d);
+  const limb=(x,y,r1,r2,len,c)=>{const p=new THREE.Group();p.position.set(x,y,0);g.add(p);add(new THREE.CylinderGeometry(r1,r2,len,12),c,0,-len/2,0,p);add(S(r1*1.05),c,0,0,0,p);return p;};
+  const armL=limb(-0.55,1.9,0.11,0.09,0.85,o.shirt), armR=limb(0.55,1.9,0.11,0.09,0.85,o.shirt);
+  armL.rotation.z=0.1; armR.rotation.z=-0.1;
+  [armL,armR].forEach(a=>add(S(0.11),o.skin,0,-0.9,0,a));
+  const legL=limb(-0.2,0.95,0.17,0.12,0.9,o.pants), legR=limb(0.2,0.95,0.17,0.12,0.9,o.pants);
+  [legL,legR].forEach(l=>add(S(1),o.shoes,0,-0.93,0.1*d,l,[0.17,0.11,0.29]));
+  return {g,armL,armR,legL,legR};
+}
+// ---- Player (-> future js/runner.js) ----
+const P = makeHuman({shirt:0x3a7bff,pants:0x2b2f55,skin:0xf2c29b,hair:0x2a1a12,shoes:0xffffff,dir:-1});
+const player = P.g; {const b=outline(new THREE.Mesh(new THREE.SphereGeometry(1,12,10),toon(0xff7ad9)),1.05);b.scale.set(0.38,0.5,0.2);b.position.set(0,1.6,0.36);player.add(b);} // startup backpack
+scene.add(player);
+
+// ---- Intro room + NYC facade (-> future js/cutscene.js) ----
+const mk=(geo,mat)=>new THREE.Mesh(geo,mat);
+const room = new THREE.Group(); scene.add(room);
+const at=(o,x,y,z)=>{o.position.set(x,y,z);room.add(o);return o;};
+box(14,0.3,12,0xc79a6b,0,-0.15,0,room); box(14,7,0.3,0xf2e2b8,0,3.5,-6,room);
+box(0.3,7,12,0xe9d3a0,-7,3.5,0,room); box(0.3,7,12,0xe9d3a0,7,3.5,0,room);
+box(3,1.1,1.4,0x7a5a3a,-4,0.55,-4.8,room); box(1.4,0.9,0.1,0x66e0ff,-4,1.7,-4.7,room); // desk + monitor
+box(2.6,0.5,1.4,0xff6b6b,4.5,0.25,-4.6,room); box(2.6,1,0.4,0xff6b6b,4.5,0.9,-5.4,room); // couch
+for(let i=0;i<14;i++) box(0.4+Math.random()*0.5,0.12,0.4+Math.random()*0.4,[0xffffff,0xffe66d,0xff9999][i%3],(Math.random()-.5)*10,0.08,(Math.random()-.5)*8,room).rotation.y=Math.random()*3; // mess
+at(outline(mk(new THREE.CylinderGeometry(2.8,2.8,0.05,24),toon(0xff7ad9)),1.02),0,0.03,0.5); // rug
+const wbT=(()=>{const c=document.createElement('canvas');c.width=512;c.height=300;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,512,300);g.font='48px Bangers, Impact';g.fillStyle='#2a4bd8';g.fillText('STARTUP PLAN',20,60);g.fillStyle='#222';g.fillText('1. Great idea',30,125);g.fillText('2. ???',30,180);g.fillStyle='#e03355';g.fillText('3. PROFIT $$$',30,240);return new THREE.CanvasTexture(c);})();
+const wb=mk(new THREE.PlaneGeometry(4,2.35),new THREE.MeshBasicMaterial({map:wbT})); wb.position.set(1.2,4,-5.8); room.add(wb);
+box(4.3,2.65,0.1,0x555555,1.2,4,-5.88,room); box(1.2,1.6,0.1,0x66e0ff,-5.5,4.3,-5.8,room); box(1.2,1.6,0.1,0xff6b6b,-3.8,4.3,-5.8,room);
+box(0.8,0.7,0.8,0x8a5a2b,6,0.35,-3,room); [1.2,1.7].forEach((y,i)=>at(outline(mk(new THREE.SphereGeometry(0.7-i*.2,10,8),toon(0x3fbf6a)),1.06),6,y,-3)); // plant
+box(0.1,3,0.1,0x333333,-6.2,1.5,-1.5,room); at(mk(new THREE.CylinderGeometry(0.35,0.6,0.7,12),new THREE.MeshBasicMaterial({color:0xffe9a0})),-6.2,3.2,-1.5); // floor lamp
+box(1,0.12,1,0xe8c07a,2,0.2,1.5,room); box(1,0.12,1,0xd9a95c,2.1,0.33,1.45,room); box(0.25,0.35,0.25,0xffffff,-3,1.3,-4.8,room); // pizza + cup
+const bean=outline(mk(new THREE.SphereGeometry(1,12,10),toon(0x7a5cff)),1.04); bean.scale.set(1,0.6,1); bean.position.set(-4.8,0.5,2); room.add(bean);
+at(new THREE.PointLight(0xffd9a0,0.9,30),0,5,0);
+const dg=new THREE.BufferGeometry(); dg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(Array.from({length:240},(_,i)=>i%3==1?Math.random()*6:(Math.random()-.5)*12)),3));
+const dust=new THREE.Points(dg,new THREE.PointsMaterial({color:0xfff2c0,size:0.09})); room.add(dust);
+const beam=mk(new THREE.PlaneGeometry(4,9),new THREE.MeshBasicMaterial({color:0xfff1b0,transparent:true,opacity:0.16,depthWrite:false,side:THREE.DoubleSide})); beam.position.set(2.5,3.2,1); beam.rotation.set(0.9,0,0.25); room.add(beam); // sunbeam
+const J = makeHuman({shirt:0x2fb67a,pants:0x3b3b4f,skin:0xc98f68,hair:0x111111,shoes:0x333333,dir:1});
+const janitor=J.g; janitor.scale.setScalar(1.25); room.add(janitor);
+{const b=outline(mk(new THREE.BoxGeometry(0.08,2,0.08),toon(0x8a5a2b)),1.1);b.position.set(0,-0.5,0.35);b.rotation.x=0.3;J.armR.add(b);
+ const br=outline(mk(new THREE.BoxGeometry(0.6,0.25,0.3),toon(0xe0c070)),1.1);br.position.set(0,-1.45,0.65);J.armR.add(br);} // broom
+const brick=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle='#c4a48a';g.fillRect(0,0,128,128);for(let r=0;r<8;r++)for(let k=-1;k<4;k++){g.fillStyle=['#b5523b','#a64632','#c2604a'][(r+k+4)%3];g.fillRect(k*32+(r%2)*16+1,r*16+1,30,14);}return new THREE.CanvasTexture(c);})();
+const bmat=new THREE.MeshToonMaterial({map:brick});
+[[14,24,-14.5,4],[14,24,14.5,4],[15,10,0,12],[15,6,0,-3]].forEach(([w,h,x,y])=>{const m=outline(mk(new THREE.BoxGeometry(w,h,1),bmat),1.01);m.position.set(x,y,6.2);room.add(m);}); // brick facade
+box(16,0.4,1.4,0xdddddd,0,-0.1,6.7,room); box(15,0.2,2.5,0x222222,0,-0.7,8,room); box(15,0.12,0.12,0x222222,0,0.6,9.2,room); // sill + fire escape
+for(let x=-7;x<=7;x+=2.5) box(0.12,1.3,0.12,0x222222,x,0,9.2,room);
+const windowFrame = new THREE.Group(); room.add(windowFrame);
+box(15,0.5,0.5,0x222222,0,6.8,6.2,windowFrame); box(15,0.5,0.5,0x222222,0,0,6.2,windowFrame);
+for(let x=-7;x<=7;x+=3.5) box(0.3,7,0.4,0x222222,x,3.5,6.2,windowFrame);
+box(15,0.25,0.4,0x222222,0,3.5,6.2,windowFrame);
+const CAM_WINDOW = {pos:new THREE.Vector3(0,3.6,13.5), look:new THREE.Vector3(0,2.4,0)};
+
+// ---- World / environment (-> future js/environment.js) ----
+const world=new THREE.Group(); scene.add(world);
+const L=480, follow=[], rec=[];
+const roadTex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle='#35353b';g.fillRect(0,0,128,128);for(let i=0;i<900;i++){g.fillStyle='rgba(255,255,255,'+Math.random()*.06+')';g.fillRect(Math.random()*128,Math.random()*128,2,2);}g.fillStyle='rgba(0,0,0,.25)';g.fillRect(40,0,6,128);g.fillRect(82,0,6,128);g.fillStyle='#fff';[.34,.66].forEach(f=>g.fillRect(f*128-2,0,4,64));g.fillStyle='#ffd21f';g.fillRect(3,0,4,128);g.fillRect(121,0,4,128);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,L/8);return t;})();
+function flat(w,color,x,y,map){const m=mk(new THREE.PlaneGeometry(w,L),map?new THREE.MeshToonMaterial({map}):toon(color));m.rotation.x=-Math.PI/2;m.position.set(x,y,0);world.add(m);follow.push(m);}
+flat(160,0x4a4d52,0,-0.05); flat(11,0xb9b6ae,-10.5,0.02); flat(11,0xb9b6ae,10.5,0.02); flat(10,0,0,0.04,roadTex);
+[-5.2,5.2].forEach(x=>{const m=mk(new THREE.BoxGeometry(0.4,0.3,L),toon(0xf0e6d0));m.position.set(x,0.1,0);world.add(m);follow.push(m);});
+const winT=(()=>{const c=document.createElement('canvas');c.width=64;c.height=128;const g=c.getContext('2d');g.fillStyle='#2b2d4a';g.fillRect(0,0,64,128);for(let r=0;r<8;r++)for(let k=0;k<4;k++){g.fillStyle=Math.random()<.6?'#ffe58a':'#4a5a8a';g.fillRect(k*16+3,r*16+3,10,10);}return new THREE.CanvasTexture(c);})();
+const bCols=[0x8d8f99,0xa77b5a,0x7f8fa6,0xb8a99a,0x6f7f73,0x9a6b5e];
+for(let i=0;i<16;i++)[-1,1].forEach((s,si)=>{
+  const z=-i*30-si*10, h=16+Math.random()*34;
+  const t=winT.clone();t.needsUpdate=true;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(3,h/8);
+  const b=outline(mk(new THREE.BoxGeometry(12,h,14),new THREE.MeshToonMaterial({map:t,color:bCols[(i+si)%6]})),1.015);
+  b.position.set(s*(20+Math.random()*4),h/2,z);
+  if(Math.random()<.5){const c1=outline(mk(new THREE.CylinderGeometry(1.4,1.4,2.2,10),toon(0x8a5a2b)),1.06);c1.position.y=h/2+1.1;b.add(c1);const c2=mk(new THREE.ConeGeometry(1.7,1.2,10),toon(0x4a3320));c2.position.y=h/2+2.8;b.add(c2);} // water tower
+  world.add(b);rec.push(b);
+  const lamp=new THREE.Group();lamp.position.set(s*6.3,0,-i*30-5);
+  const pole=mk(new THREE.CylinderGeometry(0.08,0.1,5.2,8),toon(0x333344));pole.position.y=2.6;lamp.add(pole);
+  const arm=mk(new THREE.BoxGeometry(1,0.1,0.1),toon(0x333344));arm.position.set(-s*0.5,5.2,0);lamp.add(arm);
+  const bulb=mk(new THREE.SphereGeometry(0.25,8,8),new THREE.MeshBasicMaterial({color:0xfff2a8}));bulb.position.set(-s,5.1,0);lamp.add(bulb);
+  world.add(lamp);rec.push(lamp);
+  const tree=new THREE.Group();tree.position.set(s*8.8,0,-i*30-20);
+  const tr=outline(mk(new THREE.CylinderGeometry(0.2,0.28,1.6,8),toon(0x7a4a2a)),1.1);tr.position.y=0.8;tree.add(tr);
+  const c1=outline(mk(new THREE.SphereGeometry(1.4,10,8),toon(0x3fbf6a)),1.05);c1.position.y=2.6;tree.add(c1);
+  const c2=outline(mk(new THREE.SphereGeometry(1,10,8),toon(0x62d98a)),1.05);c2.position.set(0.4,3.6,0);tree.add(c2);
+  world.add(tree);rec.push(tree);
+});
+for(let i=0;i<32;i++){const s=i%2?1:-1,h=new THREE.Group();h.position.set(s*5.9,0,-i*15-7); // hydrants + bins
+  if(i%4<2){const a=outline(mk(new THREE.CylinderGeometry(0.22,0.26,0.8,10),toon(0xd63031)),1.08);a.position.y=0.4;h.add(a);const b=mk(new THREE.SphereGeometry(0.24,10,8),toon(0xd63031));b.position.y=0.85;h.add(b);}
+  else{const a=outline(mk(new THREE.CylinderGeometry(0.4,0.35,1,12),toon(0x4d5b55)),1.06);a.position.y=0.5;h.add(a);const b=mk(new THREE.CylinderGeometry(0.43,0.43,0.1,12),toon(0x333b38));b.position.y=1.05;h.add(b);}
+  world.add(h);rec.push(h);}
+for(let i=0;i<8;i++){const c=new THREE.Group();[[0,0,0,3],[2.5,-.5,0,2.2],[-2.5,-.4,0,2.4]].forEach(([x,y,z,r])=>{const m=mk(new THREE.SphereGeometry(r,10,8),new THREE.MeshBasicMaterial({color:0xffffff}));m.position.set(x,y,z);c.add(m);});
+  c.position.set((Math.random()-.5)*120,38+Math.random()*14,-Math.random()*480);world.add(c);rec.push(c);}
+const sunM=mk(new THREE.SphereGeometry(10,16,12),new THREE.MeshBasicMaterial({color:0xfff09a,fog:false})); world.add(sunM);
+function updateWorld(pz){follow.forEach(m=>m.position.z=pz-L/2+40);roadTex.offset.y=-pz/8;rec.forEach(o=>{if(o.position.z>pz+40)o.position.z-=480;});sunM.position.set(45,48,pz-200);}
+updateWorld(0);
+
+/* =========================================================
+   MODULE 3: Intro Cutscene Logic & Camera Transition (-> js/cutscene.js)
+   ========================================================= */
+const INTRO = "Ah, beautiful morning for the start of your startup business, hope you can manage to keep your business running as there is tons of competition.";
+let typeTimer = null, camBlend = 0, camT = 999;
+function fadeIn(){const f=$('fade');f.style.transition='none';f.style.opacity=1;f.offsetWidth;f.style.transition='opacity 2.5s';f.style.opacity=0;}
+function toMenu(){$('overModal').classList.add('hidden');$('menu').classList.remove('hidden');$('runBtn').classList.add('hidden');document.body.classList.remove('run');G.phase='menu';camT=999;showRoom(true);}
+function showRoom(on){ room.visible=on; player.visible=!on; world.visible=!on; const c=on?0xffc79a:0x7fd6ff; scene.background.set(c); scene.fog.color.set(c); }
+function startCutscene(){
+  G.phase = 'cutscene'; camT = 0; fadeIn(); showRoom(true);
+  $('nameModal').classList.add('hidden'); $('subtitle').classList.remove('hidden');
+  let i = 0; $('subText').textContent = '';
+  typeTimer = setInterval(()=>{ $('subText').textContent = INTRO.slice(0,++i);
+    if(i>=INTRO.length){ clearInterval(typeTimer); $('runBtn').classList.remove('hidden'); } }, 32);
+}
+function beginRun(){
+  $('subtitle').classList.add('hidden'); G.phase = 'transition'; camBlend = 0; CAM_WINDOW.pos.copy(camera.position); document.body.classList.add('run');
+  player.position.set(0,0,0); G.lane = 1; scene.fog.far = 150;
+}
+function camRunnerTarget(){ // over-the-shoulder third-person
+  return { pos:new THREE.Vector3(player.position.x*0.6, 4.2, player.position.z+8.5), look:new THREE.Vector3(player.position.x*0.8, 1.6, player.position.z-12) };
+}
+
+/* =========================================================
+   MODULE 4: Endless Track, Obstacle & Gate Spawning Loop (-> js/runner.js)
+   ========================================================= */
+let gates = []; // each: {group, z, lane, def, used}
+function labelPlane(title){
+  const c = document.createElement('canvas'); c.width = 512; c.height = 200; const g = c.getContext('2d');
+  g.fillStyle = '#fff6d6'; g.fillRect(0,0,512,200); g.strokeStyle = '#111'; g.lineWidth = 14; g.strokeRect(7,7,498,186);
+  g.fillStyle = '#111'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '96px Bangers, Impact';
+  g.fillText(title,256,104,470);
+  return new THREE.Mesh(new THREE.PlaneGeometry(3.1,1.2), new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)}));
+}
+function makeGate(def, laneIdx, z){ // identical look for every gate: blue frame + cream title sign
+  const grp = new THREE.Group(); grp.position.set(CFG.lanes[laneIdx], 0, z);
+  box(0.35,5.4,0.5,0x3a7bff,-1.55,2.7,0,grp); box(0.35,5.4,0.5,0x3a7bff,1.55,2.7,0,grp); box(3.5,0.4,0.5,0x3a7bff,0,5.4,0,grp);
+  const lab = labelPlane(def.title); lab.position.set(0,4.5,0.28); grp.add(lab);
+  scene.add(grp); return {group:grp, z, lane:laneIdx, def, used:false};
+}
+function spawnGatePair(z){
+  const pool = GATES.slice();
+  const a = pool[Math.floor(Math.random()*pool.length)];
+  // pair rule: always offer at least one non-debuff vs one other, so choices matter
+  let b; do { b = pool[Math.floor(Math.random()*pool.length)]; } while(b===a || (a.type==='debuff' && b.type==='debuff'));
+  const lanes = [0,1,2].sort(()=>Math.random()-.5);
+  gates.push(makeGate(a,lanes[0],z), makeGate(b,lanes[1],z)); spawnObstacle(z-30); // third lane stays empty = "do nothing" option
+}
+function updateGates(dt){
+  while(G.nextGateZ > player.position.z - 220){ spawnGatePair(G.nextGateZ); G.nextGateZ -= CFG.gateSpacing; }
+  const t = performance.now()/1000;
+  gates = gates.filter(g=>{
+    if(g.z > player.position.z + 15){ scene.remove(g.group); return false; }
+    return true; });
+}
+
+/* =========================================================
+   MODULE 4b: Obstacles (-> future js/obstacles.js)
+   kinds: car (incoming, can't jump), block (jump), ditch (jump), police (checkpoint hold)
+   ========================================================= */
+let obs=[];
+function makeCar(color,police){ // front faces +z (drives toward the player)
+  const g=new THREE.Group(), m=c=>toon(c);
+  const body=outline(mk(new THREE.BoxGeometry(2,0.7,4.2),m(color)),1.04);body.position.y=0.65;g.add(body);
+  const cab=outline(mk(new THREE.SphereGeometry(1,14,10),m(color)),1.04);cab.scale.set(0.95,0.55,1.3);cab.position.set(0,1.15,-0.1);g.add(cab);
+  [[-1.05,1.3],[1.05,1.3],[-1.05,-1.3],[1.05,-1.3]].forEach(([x,z])=>{const w=outline(mk(new THREE.CylinderGeometry(0.38,0.38,0.3,12),m(0x222222)),1.08);w.rotation.z=Math.PI/2;w.position.set(x,0.38,z);g.add(w);});
+  [-0.6,0.6].forEach(x=>{const l=mk(new THREE.SphereGeometry(0.17,8,8),new THREE.MeshBasicMaterial({color:0xfff2a8}));l.position.set(x,0.7,2.1);g.add(l);});
+  g.userData.lights=[];
+  if(police){[[-0.4,0xff2244],[0.4,0x2266ff]].forEach(([x,c])=>{const l=mk(new THREE.BoxGeometry(0.7,0.2,0.4),new THREE.MeshBasicMaterial({color:c}));l.position.set(x,1.75,-0.1);g.add(l);g.userData.lights.push(l);});}
+  return g;
+}
+function spawnObstacle(z){
+  const r=Math.random(), lane=Math.floor(Math.random()*3), x=CFG.lanes[lane], g=new THREE.Group(); let o;
+  if(r<0.3){ const car=makeCar([0xe74c3c,0xf1c40f,0x2ecc71,0x9b59b6,0xecf0f1][Math.floor(Math.random()*5)]); g.add(car); g.position.set(x,0,z-40); o={kind:'car',lanes:[lane],z:z-40,speed:12,group:g}; }
+  else if(r<0.6){ // road block: striped barrier + cones
+    box(3,0.5,0.2,0xd63031,0,1.0,0,g); [-1,0,1].forEach(k=>box(0.5,0.5,0.22,0xffffff,k,1.0,0,g)); [-1.3,1.3].forEach(k=>box(0.15,1,0.15,0x444444,k,0.5,0,g));
+    [-1.6,1.6].forEach(k=>{const c=outline(mk(new THREE.ConeGeometry(0.3,0.8,10),toon(0xff8c1a)),1.08);c.position.set(k,0.4,0.5);g.add(c);});
+    g.position.set(x,0,z); o={kind:'block',lanes:[lane],z,group:g}; }
+  else if(r<0.8){ // ditch
+    box(3.2,0.06,3.6,0x120d1a,0,0.07,0,g); [-1.6,1.6].forEach(k=>box(0.2,0.12,3.6,0xffd21f,k,0.1,0,g)); [-1.8,1.8].forEach(k=>box(3.4,0.12,0.2,0xffd21f,0,0.1,k,g));
+    g.position.set(x,0,z); o={kind:'ditch',lanes:[lane],z,group:g}; }
+  else { // police stop: patrol car + officer (two adjacent lanes blocked, one free)
+    const pair=Math.random()<0.5?[0,1]:[1,2], car=makeCar(0xf4f4f4,true); car.position.x=CFG.lanes[pair[0]]; g.add(car);
+    const cop=makeHuman({shirt:0x1f3b8a,pants:0x16213f,skin:0xf2c29b,hair:0x222222,shoes:0x111111,dir:1}); cop.g.position.x=CFG.lanes[pair[1]]; cop.armR.rotation.x=-1.6; g.add(cop.g);
+    const hat=outline(mk(new THREE.CylinderGeometry(0.4,0.4,0.18,12),toon(0x16213f)),1.08); hat.position.set(CFG.lanes[pair[1]],2.85,0); g.add(hat);
+    g.position.set(0,0,z); o={kind:'police',lanes:pair,z,group:g,lights:car.userData.lights}; }
+  scene.add(g); obs.push(o);
+}
+function updateObstacles(dt){
+  obs=obs.filter(o=>{ if(o.speed) o.z+=o.speed*dt; o.group.position.z=o.z;
+    if(o.lights){const on=Math.floor(performance.now()/180)%2; o.lights[0].visible=!!on; o.lights[1].visible=!on;}
+    if(o.z>player.position.z+15){scene.remove(o.group);return false;} return true; });
+}
+
+/* =========================================================
+   MODULE 5: Collision Detection & Balance Updates (-> js/gameplay.js)
+   ========================================================= */
+let toastT = 0;
+function toast(msg, color){ const el=$('toast'); el.textContent=msg; el.style.color=color; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1100); }
+function checkObstacles(){
+  obs.forEach(o=>{ if(o.hit) return; const R=o.kind==='car'?2.3:1.1;
+    if(Math.abs(o.z-player.position.z)>R) return;
+    if(!o.lanes.some(l=>Math.abs(player.position.x-CFG.lanes[l])<1.4)) return;
+    const y=player.position.y; if((o.kind==='block'&&y>1.3)||(o.kind==='ditch'&&y>0.7)) return; // jumped clear
+    o.hit=true;
+    if(o.kind==='car'){G.balance-=15000;G.shake=0.6;o.group.visible=false;toast('CAR CRASH! -$15,000','#fff');}
+    else if(o.kind==='block'){G.balance-=8000;G.shake=0.4;o.group.visible=false;toast('ROADBLOCK! -$8,000','#fff');}
+    else if(o.kind==='ditch'){G.balance-=10000;G.stun=1;G.shake=0.4;toast('FELL IN A DITCH! -$10,000','#fff');}
+    else {G.hold=CFG.policeHold;toast('POLICE STOP!','#9cf');} });
+}
+function checkCollisions(){
+  gates.forEach(g=>{
+    if(!g.used && Math.abs(g.z - player.position.z) < 0.8 && g.lane === G.lane){
+      g.used = true; const msg = g.def.apply();
+      toast(msg, '#fff');
+      scene.remove(g.group); g.z = 1e9; // remove visually; cleanup filter will drop it
+    } });
+}
+function updateEconomy(dt){
+  const burn = CFG.baseBurn * (1 + G.time/60*CFG.burnGrowthPerMin) * G.burnMult;
+  G.balance += (G.income - burn) * dt;
+  G.burnNow = burn;
+}
+
+/* =========================================================
+   MODULE 6: Timer Logic & LocalStorage Top-10 Ranking Engine (-> js/leaderboard.js)
+   ========================================================= */
+function loadScores(){ try{ return JSON.parse(localStorage.getItem(CFG.storeKey))||[]; }catch(e){ return []; } }
+function saveScore(entry){
+  let s = loadScores(); s.push(entry);
+  s.sort((a,b)=>b.survivalSeconds-a.survivalSeconds); s = s.slice(0,10);
+  try{ localStorage.setItem(CFG.storeKey, JSON.stringify(s)); }catch(e){}
+  return s;
+}
+function renderBoard(scores, mine, id='board'){
+  $(id).innerHTML = '<tr><th>#</th><th>Company</th><th>Time</th><th>Balance</th></tr>' +
+    scores.map((s,i)=>`<tr class="${s===mine||(mine&&s.ts===mine.ts)?'me':''}"><td>${i+1}</td><td>${s.companyName.replace(/</g,'&lt;')}</td><td>${s.survivalTime}</td><td>${fmt(s.finalBalance)}</td></tr>`).join('');
+}
+function gameOver(){
+  G.phase = 'over'; G.balance = Math.min(G.balance, 0);
+  const entry = {companyName:G.companyName, survivalTime:mmss(G.time), survivalSeconds:Math.floor(G.time), finalBalance:Math.round(G.balance), ts:Date.now()};
+  const scores = saveScore(entry); renderBoard(scores, entry);
+  $('overText').textContent = `${G.companyName} lasted ${mmss(G.time)}.`;
+  $('overModal').classList.remove('hidden'); $('hud').classList.add('hidden');
+}
+function resetGame(){
+  gates.forEach(g=>scene.remove(g.group)); gates = [];
+  Object.assign(G,{balance:CFG.startBalance,time:0,burnMult:1,income:0,lane:1,speedMult:1,nextGateZ:-CFG.firstGate,dist:0,vy:0,air:false,slide:0,hold:0,stun:0,shake:0}); obs.forEach(o=>scene.remove(o.group)); obs=[]; player.rotation.set(0,0,0); player.scale.set(1,1,1);
+  player.position.set(0,0,0);
+}
+
+/* =========================================================
+   MAIN LOOP + INPUT (-> future js/main.js)
+   ========================================================= */
+function onKey(e){
+  if(G.phase!=='play') return;
+  const k = e.key.toLowerCase();
+  if(k==='arrowleft'||k==='a') G.lane = Math.max(0,G.lane-1);
+  if(k==='arrowright'||k==='d') G.lane = Math.min(2,G.lane+1);
+  if((k==='arrowup'||k==='w'||k===' ')&&!G.air&&G.hold<=0){ G.vy=12; G.air=true; G.slide=0; }  // jump
+  if(k==='arrowdown'||k==='s'){ G.slide=0.7; if(G.air) G.vy=-22; }                              // slide / fast-fall
+}
+addEventListener('keydown', onKey);
+let touchX = null, touchY = null; // basic swipe support
+addEventListener('touchstart',e=>{touchX=e.touches[0].clientX;touchY=e.touches[0].clientY;});
+addEventListener('touchend',e=>{ if(touchX===null||G.phase!=='play')return; const dx=e.changedTouches[0].clientX-touchX, dy=e.changedTouches[0].clientY-touchY;
+  if(Math.abs(dx)>Math.abs(dy)){ if(Math.abs(dx)>30) G.lane = Math.max(0,Math.min(2,G.lane+(dx>0?1:-1))); }
+  else if(dy<-30) onKey({key:'ArrowUp'}); else if(dy>30) onKey({key:'ArrowDown'});
+  touchX=null; });
+
+$('launchBtn').onclick = ()=>{ G.companyName = $('nameInput').value.trim() || 'Unicorn AI Corp'; resetGame(); startCutscene(); };
+$('nameInput').addEventListener('keydown',e=>{ if(e.key==='Enter') $('launchBtn').click(); });
+$('runBtn').onclick = beginRun;
+$('againBtn').onclick = toMenu;
+$('startBtn').onclick = ()=>{ $('menu').classList.add('hidden'); $('nameModal').classList.remove('hidden'); G.phase='name'; };
+$('scoresBtn').onclick = ()=>{ const sc=loadScores(); if(sc.length) renderBoard(sc,null,'board2'); else $('board2').innerHTML='<tr><td>No runs yet. Start a game to set a score.</td></tr>'; $('menu').classList.add('hidden'); $('scoresModal').classList.remove('hidden'); };
+$('backBtn').onclick = ()=>{ $('scoresModal').classList.add('hidden'); $('menu').classList.remove('hidden'); };
+
+const clock = new THREE.Clock(); const tmpLook = new THREE.Vector3();
+function loop(){
+  requestAnimationFrame(loop);
+  const dt = Math.min(clock.getDelta(), 0.05), t = performance.now()/1000;
+  if(G.phase==='menu'||G.phase==='name'||G.phase==='cutscene'){
+    if(G.phase==='cutscene') camT += dt;
+    const e = 1-Math.pow(1-Math.min(1,camT/9),3); // slow cinematic dolly-in
+    camera.position.set(-9+9*e+Math.sin(t*.3)*.4, 3+.6*e+Math.sin(t*.4)*.15, 26-12.5*e); camera.lookAt(0,2.4,0);
+    janitor.position.x = Math.sin(t*1.2)*2.5; janitor.rotation.y = Math.cos(t*1.2)*.6;
+    J.armR.rotation.x = -.7+Math.sin(t*7)*.35; J.armL.rotation.x = Math.sin(t*7)*.2;
+    J.legL.rotation.x = Math.sin(t*5)*.4; J.legR.rotation.x = -Math.sin(t*5)*.4; dust.rotation.y = t*.05;
+  } else if(G.phase==='transition'){
+    camBlend = Math.min(1, camBlend + dt/2.2);
+    const e = camBlend*camBlend*(3-2*camBlend), tg = camRunnerTarget();
+    camera.position.lerpVectors(CAM_WINDOW.pos, tg.pos, e);
+    tmpLook.lerpVectors(CAM_WINDOW.look, tg.look, e); camera.lookAt(tmpLook);
+    if(camBlend>0.5 && room.visible){ showRoom(false); } // swap room for track mid-fly
+    if(camBlend>=1){ G.phase='play'; $('hud').classList.remove('hidden'); }
+  } else if(G.phase==='play'){
+    G.time += dt;
+    G.speedMult = Math.pow(CFG.speedStep, Math.floor(G.time/CFG.speedEvery));
+    G.hold=Math.max(0,G.hold-dt); G.stun=Math.max(0,G.stun-dt); G.slide=Math.max(0,G.slide-dt);
+    const speed = G.hold>0 ? 0 : CFG.baseSpeed*G.speedMult*(G.stun>0?0.4:1);
+    player.position.z -= speed*dt; G.dist += speed*dt;
+    G.vy -= 34*dt; player.position.y += G.vy*dt; if(player.position.y<=0){ player.position.y=0; G.vy=0; G.air=false; }
+    if(G.hold>0){ const tt=$('toast'); tt.textContent='POLICE STOP! Held up '+G.hold.toFixed(1)+'s'; tt.style.color='#9cf'; tt.classList.add('show'); G._h=true; }
+    else if(G._h){ $('toast').classList.remove('show'); G._h=false; }
+    player.position.x += (CFG.lanes[G.lane]-player.position.x) * Math.min(1, dt*12);
+    const run=G.hold>0?0:1, sw=Math.sin(t*13)*0.95*run, dx=CFG.lanes[G.lane]-player.position.x;
+    P.legL.rotation.x=G.air?-0.9:sw; P.legR.rotation.x=G.air?0.5:-sw; P.armL.rotation.x=G.air?-2.4:-sw*0.9; P.armR.rotation.x=G.air?-2.4:sw*0.9;
+    player.rotation.x=G.slide>0?0.7:-0.18*run; player.scale.y=G.slide>0?0.6:1;       // forward lean / slide crouch
+    player.rotation.z=THREE.MathUtils.clamp(-dx*0.12,-0.4,0.4); player.rotation.y=THREE.MathUtils.clamp(-dx*0.1,-0.35,0.35); // lane-change bank
+    updateGates(dt); updateObstacles(dt); checkCollisions(); checkObstacles(); updateEconomy(dt);
+    const tg = camRunnerTarget(); camera.position.lerp(tg.pos, Math.min(1,dt*8)); camera.lookAt(tg.look);
+    if(G.shake>0){ camera.position.x+=(Math.random()-.5)*G.shake; camera.position.y+=(Math.random()-.5)*G.shake; G.shake-=dt*1.5; }
+    updateWorld(player.position.z);
+    // HUD
+    $('bal').textContent = fmt(G.balance); $('bal').classList.toggle('low', G.balance < 15000);
+    $('timer').textContent = 'SURVIVAL TIME: ' + mmss(G.time);
+    $('burn').textContent = '-' + fmt(G.burnNow) + '/s';
+    $('sub').textContent = G.income ? `Income +${fmt(G.income)}/s` : `Speed x${G.speedMult.toFixed(2)}`;
+    if(G.balance <= 0) gameOver();
+  } else if(G.phase==='over'){
+    player.position.z -= 2*dt;
+  }
+  renderer.render(scene, camera);
+}
+addEventListener('resize',()=>{ camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+showRoom(true); G.nextGateZ = -CFG.firstGate; loop(); setTimeout(()=>{$('fade').style.transition='opacity 2s';$('fade').style.opacity=0;},100);
+</script>
+</body>
+</html>
