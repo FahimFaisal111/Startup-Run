@@ -103,3 +103,26 @@ Backup of the pre-overhaul file: not kept in outputs (ask the user to keep their
 - Loft: detailed modern desk setup, furniture, window framing, ambient particles polish; founder and janitor animation and camera moves (see earlier TODO).
 - Character: sneaker detail, hair styles; the model is smooth and jointed but not at Subway Surfers asset quality (code-only limit).
 - Playtest everything: this version was only `node --check` syntax-tested. Look for too-dark or too-bright lighting after the switch to PBR and tone mapping, and tune light intensities (`hemiLight`, `sun`, room `PointLight`).
+
+---
+## Session v2.1: Chaotic Market Events, 2-Hit Game Over & Dynamic Volumetric Sky
+**Done**
+1. **Chaotic Macro Market Events**:
+   - Triggers every 45-60 seconds for 15 seconds with an emergency glassmorphic announcement banner (`#marketBanner`).
+   - *Tech Bubble / Crypto Craze*: Golden glowing sky, forward speed spikes +30%, dense torrential coin and cash waves spawn across all 3 lanes!
+   - *Market Downturn / Recession*: Dark stormy clouds, torrential 3D rain particle system (`rainSystem`), burn rate DOUBLED (2x)!
+   - *Viral Server Crash / DDoS Attack*: Screen glitch distortion shader/CSS (`#glitchOverlay`), gate holographic signs glitch out with scrambled error texts.
+2. **2-Hit Collision Game Over (Strikes System)**:
+   - Max 2 strikes before company total loss.
+   - 1st collision deals damage/balance penalty, screen shake, red flash, audio crash, and updates HUD integrity hearts (`💔❤️`).
+   - 2nd collision triggers fatal `gameOver(false, 'fatal_crash')` (`💔💔`).
+   - Legal Shield (`G.shieldActive`) absorbs 1 collision penalty-free and strike-free.
+3. **Harder Obstacle & Traffic Challenge**:
+   - Continuous obstacle spawner (`nextObstacleZ`) spawning every 16-26m (instead of once every 65m).
+   - Multi-lane combination challenges (e.g. oncoming car + road barrier or scaffold).
+   - Oncoming cars drive significantly faster toward the player (16 to 28 units/sec).
+   - Clean jump vault height threshold calibrated for cars and obstacles.
+4. **Dynamic Moving Volumetric Clouds**:
+   - 36 volumetric multi-lobe puffy cumulus cloud clusters in the sky (`cloudList`).
+   - Wind drift along X and Z plus forward runner parallax.
+   - Dynamic cloud tinting: golden amber in Crypto Craze, dark stormy slate in Recession, day/sunset/night daylight matching.

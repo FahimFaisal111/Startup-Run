@@ -130,6 +130,39 @@ table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
 #badgeMagnet{border-color:#f43f5e;color:#fda4af;box-shadow:0 0 16px rgba(244,63,94,.35)}
 #badgeBoost{border-color:#00ffcc;color:#6ee7b7;box-shadow:0 0 18px rgba(0,255,204,.45)}
 @keyframes pulseBadge{from{transform:scale(1)}to{transform:scale(1.05)}}
+
+/* Market Event Alert Banner */
+#marketBanner{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:14px;padding:9px 24px;border-radius:20px;font-family:Inter,system-ui,sans-serif;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 12px 40px rgba(0,0,0,.55);animation:bannerSlide .35s ease-out;pointer-events:none}
+@keyframes bannerSlide{from{transform:translate(-50%,-40px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+#marketBadge{padding:5px 12px;border-radius:12px;font-weight:800;font-size:.85rem;letter-spacing:1px}
+#marketInfo{display:flex;flex-direction:column;align-items:flex-start}
+#marketTitle{font-weight:800;font-size:1.15rem;letter-spacing:.5px;line-height:1.2}
+#marketDesc{font-size:.82rem;font-weight:600;opacity:.92}
+#marketTimer{font-weight:800;font-size:1.3rem;padding:5px 12px;border-radius:14px;background:rgba(0,0,0,.4);font-variant-numeric:tabular-nums}
+
+/* Market Event Visual Themes */
+.event-crypto{background:rgba(42,28,4,.88)!important;border:2px solid #ffd700!important;box-shadow:0 0 35px rgba(255,215,0,.45)!important;color:#fff}
+.event-crypto #marketBadge{background:#ffd700;color:#1a1400}
+.event-crypto #marketTitle{color:#ffe57f}
+
+.event-recession{background:rgba(42,10,18,.9)!important;border:2px solid #ff2a55!important;box-shadow:0 0 35px rgba(255,42,85,.55)!important;color:#fff}
+.event-recession #marketBadge{background:#ff2a55;color:#fff;animation:pulseBadge .8s infinite alternate}
+.event-recession #marketTitle{color:#ff8099}
+
+.event-ddos{background:rgba(12,8,30,.92)!important;border:2px solid #00ffcc!important;box-shadow:0 0 35px rgba(0,255,204,.45)!important;color:#fff}
+.event-ddos #marketBadge{background:#00ffcc;color:#05241d}
+.event-ddos #marketTitle{color:#7df9ff}
+
+/* Screen Glitch Overlay for DDoS Attack */
+#glitchOverlay{position:fixed;inset:0;pointer-events:none;z-index:9;display:none}
+body.ddosActive #glitchOverlay{display:block;background:repeating-linear-gradient(0deg,rgba(0,255,204,.08) 0px,rgba(0,255,204,.08) 2px,transparent 2px,transparent 5px);animation:scanlineJitter .15s steps(2) infinite}
+@keyframes scanlineJitter{0%{transform:translateY(0);filter:none}50%{transform:translateY(2px);filter:hue-rotate(90deg) contrast(1.25)}100%{transform:translateY(-1px);filter:none}}
+body.ddosActive #panel{box-shadow:inset 0 0 50px rgba(0,255,204,.25)!important}
+
+/* Strike HUD Indicator */
+#strikeHearts{transition:transform .2s;text-shadow:0 2px 10px rgba(255,0,0,.5)}
+#strikeBox.warn{border-color:#ff2a55!important;animation:strikePulse .6s infinite alternate}
+@keyframes strikePulse{from{box-shadow:0 0 10px rgba(255,42,85,.4)}to{box-shadow:0 0 25px rgba(255,42,85,.85)}}
 </style>
 </head>
 <body>
@@ -137,6 +170,17 @@ table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
 <div class="bar" id="barT"></div><div class="bar" id="barB"></div>
 <div id="fade"></div>
 <div id="flashOverlay"></div>
+<div id="glitchOverlay"></div>
+
+<!-- Market Event Alert Banner -->
+<div id="marketBanner" class="ui hidden">
+  <div id="marketBadge">🚨 ALERT</div>
+  <div id="marketInfo">
+    <div id="marketTitle">MARKET EVENT</div>
+    <div id="marketDesc">Macro condition change</div>
+  </div>
+  <div id="marketTimer">15.0s</div>
+</div>
 
 <!-- Top Buttons (Mute / Pause) -->
 <div id="topControls" class="hidden">
@@ -179,18 +223,23 @@ table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
         <strong>W / Up / Space:</strong> Jump over blocks & potholes<br>
         <strong>S / Down:</strong> Slide under low scaffolds & fast-fall
       </div>
+      <div class="guideBox" style="border-left:6px solid #ff2a55">
+        <strong style="color:#ff2a55">⚠️ 2-HIT FATAL CRASH & HARD ROAD</strong>
+        <strong>2 Strikes Max:</strong> 1st crash warns & deals balance penalty; 2nd crash is fatal Game Over!<br>
+        <strong>Shield Lifesaver:</strong> Legal Shield 🛡️ absorbs 1 hit penalty & strike-free!
+      </div>
+      <div class="guideBox" style="border-left:6px solid #ffd700">
+        <strong style="color:#ffd700">🌪️ 15-SECOND MARKET EVENTS</strong>
+        <strong>🚀 Crypto Craze:</strong> Golden sky, speed +30%, cash torrent across all lanes!<br>
+        <strong>📉 Market Recession:</strong> Stormy dark rain, burn rate DOUBLED (2x)!<br>
+        <strong>👾 DDoS Attack:</strong> Screen glitch distortion & gate metrics scrambled!
+      </div>
       <div class="guideBox" style="border-left:6px solid #00ffcc">
         <strong style="color:#00ffcc">POWER-UPS & BOOST PADS</strong>
         <strong>Coins & Cash:</strong> +$20-$100 cash to stretch runway<br>
         <strong>🧲 Magnet:</strong> Attracts nearby cash for 10s<br>
         <strong>🛡️ Legal Shield:</strong> Pass through 1 obstacle free<br>
         <strong>⚡ Speed Boost:</strong> Speed burst + 2x Cash Multiplier!
-      </div>
-      <div class="guideBox" style="border-left:6px solid #ff7ad9">
-        <strong style="color:#ff7ad9">FUNDING MILESTONES & 10-MIN IPO</strong>
-        <strong>Milestones (Every 500m):</strong> Big Funding Rounds ($1k-$2.5k cash)!<br>
-        <strong>10-Min Limit:</strong> Survive the full 10:00 to ring the NASDAQ bell for a Unicorn IPO Exit!<br>
-        <strong>Difficulty Tiers:</strong> Day ☀️ → Sunset 🌅 → Night 🌙 → Neon Cyberpunk ⚡!
       </div>
     </div>
     <button id="guideBackBtn">Got It!</button>
@@ -244,6 +293,10 @@ table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
   <div style="text-align:center">
     <div class="box" id="timer">SURVIVAL TIME: 00:00</div>
     <div class="box" id="hudSub">SPEED x1.00 • DIST 0m</div>
+  </div>
+  <div class="box" id="strikeBox" style="text-align:center">
+    <div style="font-size:0.85rem;color:#ccc;letter-spacing:1px" id="strikeLabel">STRIKES (2 MAX)</div>
+    <div id="strikeHearts" style="font-size:1.55rem;letter-spacing:4px">❤️❤️</div>
   </div>
   <div class="box" id="burnBox">
     <div id="burnVal">-$1,000/s</div>
@@ -432,6 +485,42 @@ const AudioEngine = {
         setTimeout(() => this.tone(f, 0.22, 'triangle', 0.22), i * 85);
       });
     } catch(e){}
+  },
+  marketAlert(type) { // Emergency macro-economic announcement sound
+    this.init();
+    if (this.muted || !this.ctx) return;
+    try {
+      if (type === 'crypto') {
+        [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => {
+          setTimeout(() => this.tone(f, 0.14, 'triangle', 0.24), i * 50);
+        });
+      } else if (type === 'recession') {
+        [220, 164.8, 110].forEach((f, i) => {
+          setTimeout(() => this.tone(f, 0.35, 'sawtooth', 0.28), i * 150);
+        });
+      } else { // ddos glitch beep burst
+        [880, 440, 1200, 320, 960].forEach((f, i) => {
+          setTimeout(() => this.tone(f, 0.08, 'square', 0.18), i * 40);
+        });
+      }
+    } catch(e){}
+  },
+  thunder() { // Low rumble storm atmospheric boom
+    this.init();
+    if (this.muted || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(85, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(28, this.ctx.currentTime + 0.9);
+      g.gain.setValueAtTime(0.28, this.ctx.currentTime);
+      g.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.95);
+      osc.connect(g);
+      g.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.95);
+    } catch(e){}
   }
 };
 
@@ -475,6 +564,14 @@ const G = {
   buffsCount: 0,
   debuffsCount: 0,
   staffCount: 0,
+  // 2-Hit Collision Game Over
+  strikes: 0,
+  // 15-Second Chaotic Market Events
+  marketEvent: null, // { type: 'crypto' | 'recession' | 'ddos', timer: 15, title, desc, cls }
+  nextEventTime: 45, // Triggers every 45-60 seconds
+  lastEventType: null,
+  eventSpeedMult: 1.0,
+  eventBurnMult: 1.0,
   // Power-ups & Milestone State
   magnetTimer: 0,
   shieldActive: false,
@@ -1004,24 +1101,120 @@ for(let i=0; i<32; i++){
   world.add(h); rec.push(h); recInitialZ.push(h.position.z);
 }
 
-// Clouds & Sun
-for(let i=0; i<8; i++){
-  const c = new THREE.Group();
-  [[0,0,0,3],[2.5,-.5,0,2.2],[-2.5,-.4,0,2.4]].forEach(([x,y,z,r]) => {
-    const m = mk(new THREE.SphereGeometry(r,10,8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-    m.position.set(x,y,z); c.add(m);
+// Dynamic Moving Clouds Engine (Volumetric Puffy Sky)
+const cloudList = [];
+const cloudMat = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  roughness: 0.85,
+  metalness: 0.05,
+  flatShading: false
+});
+
+function makeCloudMesh(scale = 1.0) {
+  const g = new THREE.Group();
+  // Realistic multi-lobe puffy cumulus cluster
+  const lobes = [
+    [0, 0, 0, 3.4],
+    [3.0, -0.4, 0.4, 2.5],
+    [-2.8, -0.3, -0.3, 2.6],
+    [1.5, 1.3, -0.4, 2.1],
+    [-1.4, 1.1, 0.3, 2.0],
+    [4.6, -0.8, 0.2, 1.7],
+    [-4.2, -0.7, 0.1, 1.8]
+  ];
+  lobes.forEach(([x, y, z, r]) => {
+    const geo = new THREE.SphereGeometry(r, 12, 10);
+    const m = new THREE.Mesh(geo, cloudMat);
+    m.position.set(x, y, z);
+    m.scale.set(1.2, 0.72, 1.0); // Flattened base for classic puffy cumulus look
+    g.add(m);
   });
-  c.position.set((Math.random()-.5)*120, 38+Math.random()*14, -Math.random()*480);
-  world.add(c); rec.push(c); recInitialZ.push(c.position.z);
+  g.scale.setScalar(scale);
+  return g;
 }
+
+// Populate 36 volumetric clouds spanning across the sky
+for (let i = 0; i < 36; i++) {
+  const isHigh = i % 2 === 0;
+  const sc = isHigh ? (1.5 + Math.random() * 0.9) : (0.95 + Math.random() * 0.55);
+  const cloud = makeCloudMesh(sc);
+  const x = (Math.random() - 0.5) * 220;
+  const y = isHigh ? (44 + Math.random() * 16) : (30 + Math.random() * 12);
+  const z = 30 - Math.random() * 520;
+  cloud.position.set(x, y, z);
+  world.add(cloud);
+  cloudList.push({
+    group: cloud,
+    driftX: (Math.random() - 0.5) * 1.6, // Wind drift across X
+    driftZ: -0.6 - Math.random() * 1.2,  // Forward wind drift
+    initialY: y,
+    scale: sc
+  });
+}
+
 const sunM = mk(new THREE.SphereGeometry(10, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff09a, fog: false }));
 world.add(sunM);
 
-function updateWorld(pz) {
+// Atmospheric Rain System (for Market Downturn / Recession Event)
+const RAIN_COUNT = 450;
+const rainGeo = new THREE.BufferGeometry();
+const rainPositions = new Float32Array(RAIN_COUNT * 3);
+for (let i = 0; i < RAIN_COUNT; i++) {
+  rainPositions[i * 3] = (Math.random() - 0.5) * 36;
+  rainPositions[i * 3 + 1] = Math.random() * 28;
+  rainPositions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+}
+rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
+const rainMat = new THREE.PointsMaterial({
+  color: 0x82b1ff,
+  size: 0.38,
+  transparent: true,
+  opacity: 0.75
+});
+const rainSystem = new THREE.Points(rainGeo, rainMat);
+rainSystem.visible = false;
+scene.add(rainSystem);
+
+function updateRain(pz, dt) {
+  if (!rainSystem.visible) return;
+  rainSystem.position.z = pz - 6;
+  const pos = rainGeo.attributes.position.array;
+  for (let i = 0; i < RAIN_COUNT; i++) {
+    pos[i * 3 + 1] -= 60 * dt; // Heavy falling rain
+    if (pos[i * 3 + 1] < 0) {
+      pos[i * 3 + 1] = 26 + Math.random() * 4;
+      pos[i * 3] = (Math.random() - 0.5) * 36;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 40;
+    }
+  }
+  rainGeo.attributes.position.needsUpdate = true;
+}
+
+function updateClouds(pz, dt) {
+  cloudList.forEach(c => {
+    // 1. Sideways wind drift
+    c.group.position.x += c.driftX * dt;
+    if (c.group.position.x > 125) c.group.position.x = -125;
+    if (c.group.position.x < -125) c.group.position.x = 125;
+
+    // 2. Wind drift along track
+    c.group.position.z += c.driftZ * dt;
+
+    // 3. Seamless wrap-around as the founder sprints forward
+    if (c.group.position.z > pz + 45) {
+      c.group.position.z = pz - 460 - Math.random() * 70;
+      c.group.position.x = (Math.random() - 0.5) * 220;
+    }
+  });
+}
+
+function updateWorld(pz, dt = 0.016) {
   follow.forEach(m => m.position.z = pz - L/2 + 40);
   roadTex.offset.y = -pz / 12;
   sidewalkTex.offset.y = -pz / 8;
   rec.forEach(o => { if (o.position.z > pz + 40) o.position.z -= 480; });
+  updateClouds(pz, dt);
+  updateRain(pz, dt);
   sunM.position.set(45, 52, pz - 220);
   sun.position.set(12, 28, pz + 14);
   sun.target.position.set(0, 0, pz - 20);
@@ -1050,6 +1243,9 @@ function toMenu() {
   $('runBtn').classList.add('hidden');
   $('topControls').classList.add('hidden');
   $('powerupsBar').classList.add('hidden');
+  $('marketBanner').classList.add('hidden');
+  document.body.classList.remove('ddosActive');
+  if (typeof rainSystem !== 'undefined' && rainSystem) rainSystem.visible = false;
   document.body.classList.remove('run');
   G.phase = 'menu';
   camT = 999;
@@ -1145,14 +1341,54 @@ function makeGate(def, laneIdx, z) {
   [-1.6, 1.6].forEach(x => { const n = mk(new THREE.BoxGeometry(0.06, 5.4, 0.06), neon); n.position.set(x, 2.8, 0.28); grp.add(n); });
   { const n = mk(new THREE.BoxGeometry(3.4, 0.06, 0.06), neon); n.position.set(0, 5.35, 0.28); grp.add(n); }
   // Signboard Plane
-  const signMap = createGateCanvas(def);
+  const signMap = (G.marketEvent && G.marketEvent.type === 'ddos')
+    ? createGlitchGateCanvas('👾 [DDoS FLOOD]')
+    : createGateCanvas(def);
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.3, 1.55), new THREE.MeshBasicMaterial({ map: signMap, side: THREE.DoubleSide, transparent: true, opacity: 0.95 }));
   sign.position.set(0, 4.65, 0.28);
   grp.add(sign);
 
   const sparkles = [], sirens = []; // v1.1: no per-type effects (would hint at buff/debuff)
   scene.add(grp);
-  return { group: grp, z, lane: laneIdx, def, used: false, sparkles, sirens };
+  return { group: grp, z, lane: laneIdx, def, used: false, sparkles, sirens, sign };
+}
+
+function createGlitchGateCanvas(text) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 240; const g = c.getContext('2d');
+  g.fillStyle = 'rgba(8,12,30,.96)'; g.fillRect(0,0,512,240);
+  g.fillStyle = 'rgba(0,255,204,.14)';
+  for (let y = 0; y < 240; y += 8) g.fillRect(0, y, 512, 3);
+  g.fillStyle = 'rgba(255,42,85,.32)';
+  for (let i = 0; i < 5; i++) g.fillRect(Math.random()*420, Math.random()*210, Math.random()*90, Math.random()*16);
+  g.strokeStyle = '#00ffcc'; g.lineWidth = 6; g.strokeRect(4,4,504,232);
+  g.fillStyle = '#00ffcc'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.shadowColor = '#00ffcc'; g.shadowBlur = 16;
+  g.font = '800 46px monospace, Inter, Arial';
+  g.fillText(text, 256, 120, 480);
+  return new THREE.CanvasTexture(c);
+}
+
+function scrambleGateTexts() {
+  const glitches = [
+    'E̶R̶R̶O̶R̶ 404', 'DDoS FLOOD', 'NULL_PTR_EXC', 'AWS CORRUPT',
+    'PACKET LOST', 'SERVER CRASH', 'MEMORY LEAK', 'BYTE STORM'
+  ];
+  gates.forEach(g => {
+    if (g.sign && !g.used) {
+      const gTxt = glitches[Math.floor(Math.random() * glitches.length)];
+      g.sign.material.map = createGlitchGateCanvas(gTxt);
+      g.sign.material.map.needsUpdate = true;
+    }
+  });
+}
+
+function restoreGateTexts() {
+  gates.forEach(g => {
+    if (g.sign && !g.used && g.def) {
+      g.sign.material.map = createGateCanvas(g.def);
+      g.sign.material.map.needsUpdate = true;
+    }
+  });
 }
 
 function spawnGatePair(z) {
@@ -1166,11 +1402,6 @@ function spawnGatePair(z) {
 
   const lanes = [0, 1, 2].sort(() => Math.random() - 0.5);
   gates.push(makeGate(a, lanes[0], z), makeGate(b, lanes[1], z));
-
-  // Spawn obstacles midway between gates after the first gate set
-  if (z < -CFG.firstGate) {
-    spawnObstacle(z - CFG.gateSpacing * 0.5);
-  }
 }
 
 function updateGates(dt) {
@@ -1235,21 +1466,19 @@ function makeCar(color, police) { // v1.2: lower rounded body, tinted glass cabi
   return g;
 }
 
-function spawnObstacle(z) {
-  const r = Math.random();
-  const lane = Math.floor(Math.random() * 3);
+function makeObstacle(kind, lane, z) {
   const x = CFG.lanes[lane];
   const g = new THREE.Group();
   let o;
 
-  if (r < 0.25) { // Incoming Car (moves toward player in open stretch)
-    const car = makeCar([0xe74c3c, 0xf1c40f, 0x2ecc71, 0x9b59b6, 0xecf0f1][Math.floor(Math.random()*5)]);
+  if (kind === 'car') {
+    const car = makeCar([0xe74c3c, 0xf1c40f, 0x2ecc71, 0x9b59b6, 0xecf0f1, 0xe67e22][Math.floor(Math.random()*6)]);
     g.add(car);
-    g.position.set(x, 0, z - 12);
-    const tierSpeeds = [0, 8, 11, 14, 18];
-    const carSpeed = tierSpeeds[G.currentTier || 1] || 8;
-    o = { kind: 'car', lanes: [lane], z: z - 12, speed: carSpeed, group: g };
-  } else if (r < 0.48) { // Road Barrier (Jump over)
+    g.position.set(x, 0, z - 14);
+    const tierSpeeds = [0, 16, 20, 24, 28];
+    const carSpeed = tierSpeeds[G.currentTier || 1] || 16;
+    o = { kind: 'car', lanes: [lane], z: z - 14, speed: carSpeed, group: g };
+  } else if (kind === 'block') {
     box(3, 0.5, 0.2, 0xd63031, 0, 1.0, 0, g);
     [-1, 0, 1].forEach(k => box(0.5, 0.5, 0.22, 0xffffff, k, 1.0, 0, g));
     [-1.3, 1.3].forEach(k => box(0.15, 1, 0.15, 0x444444, k, 0.5, 0, g));
@@ -1259,22 +1488,20 @@ function spawnObstacle(z) {
     });
     g.position.set(x, 0, z);
     o = { kind: 'block', lanes: [lane], z, group: g };
-  } else if (r < 0.68) { // Low Scaffold / Overhead Wire (Slide under)
-    // Left & Right posts
+  } else if (kind === 'overhead') {
     box(0.2, 2.8, 0.2, 0x444444, -1.6, 1.4, 0, g);
     box(0.2, 2.8, 0.2, 0x444444, 1.6, 1.4, 0, g);
-    // Overhead beam with caution stripes
     box(3.4, 0.8, 0.3, 0xffd21f, 0, 2.0, 0, g);
     [-1.2, -0.4, 0.4, 1.2].forEach(k => box(0.4, 0.82, 0.32, 0x111111, k, 2.0, 0, g));
     g.position.set(x, 0, z);
     o = { kind: 'overhead', lanes: [lane], z, group: g };
-  } else if (r < 0.85) { // Ditch / Pothole (Jump over)
+  } else if (kind === 'ditch') {
     box(3.2, 0.06, 3.8, 0x120d1a, 0, 0.07, 0, g);
     [-1.6, 1.6].forEach(k => box(0.2, 0.12, 3.8, 0xffd21f, k, 0.1, 0, g));
     [-1.8, 1.8].forEach(k => box(3.4, 0.12, 0.2, 0xffd21f, 0, 0.1, k, g));
     g.position.set(x, 0, z);
     o = { kind: 'ditch', lanes: [lane], z, group: g };
-  } else { // Police checkpoint (blocks 2 lanes, 1 free)
+  } else { // Police checkpoint
     const pair = Math.random() < 0.5 ? [0, 1] : [1, 2];
     const car = makeCar(0xf4f4f4, true);
     car.position.x = CFG.lanes[pair[0]];
@@ -1294,7 +1521,43 @@ function spawnObstacle(z) {
   obs.push(o);
 }
 
+function spawnObstaclePattern(z) {
+  // Avoid overlapping decision gates
+  if (gates.some(g => Math.abs(g.z - z) < 14)) return;
+
+  const r = Math.random();
+  // 35% chance to spawn a multi-lane combination challenge (leaving at least 1 lane open)
+  if (r < 0.35) {
+    const lanes = [0, 1, 2].sort(() => Math.random() - 0.5);
+    const kindA = Math.random() < 0.55 ? 'car' : 'block';
+    makeObstacle(kindA, lanes[0], z);
+    const kindB = Math.random() < 0.5 ? 'overhead' : 'ditch';
+    makeObstacle(kindB, lanes[1], z);
+  } else {
+    const lane = Math.floor(Math.random() * 3);
+    const sub = Math.random();
+    let kind;
+    if (sub < 0.34) kind = 'car';
+    else if (sub < 0.56) kind = 'block';
+    else if (sub < 0.74) kind = 'overhead';
+    else if (sub < 0.88) kind = 'ditch';
+    else kind = 'police';
+    makeObstacle(kind, lane, z);
+  }
+}
+
+let nextObstacleZ = -22;
+
 function updateObstacles(dt) {
+  while (nextObstacleZ > player.position.z - 240) {
+    if (nextObstacleZ < -24) {
+      spawnObstaclePattern(nextObstacleZ);
+    }
+    const tierSpacing = [26, 24, 21, 18, 16];
+    const spacing = tierSpacing[G.currentTier || 1] || 22;
+    nextObstacleZ -= spacing;
+  }
+
   obs = obs.filter(o => {
     if (o.speed) o.z += o.speed * dt;
     o.group.position.z = o.z;
@@ -1664,6 +1927,22 @@ function toast(msg, color='#fff') {
   setTimeout(() => el.remove(), 1250);
 }
 
+function updateStrikesUI() {
+  const box = $('strikeBox');
+  const hearts = $('strikeHearts');
+  if (!box || !hearts) return;
+  if (G.strikes === 0) {
+    hearts.textContent = '❤️❤️';
+    box.classList.remove('warn');
+  } else if (G.strikes === 1) {
+    hearts.textContent = '💔❤️';
+    box.classList.add('warn');
+  } else {
+    hearts.textContent = '💔💔';
+    box.classList.add('warn');
+  }
+}
+
 function checkObstacles() {
   obs.forEach(o => {
     if (o.hit) return;
@@ -1673,11 +1952,11 @@ function checkObstacles() {
 
     const y = player.position.y;
     // Jump clears blocks and ditches
-    if ((o.kind === 'block' && y > 1.25) || (o.kind === 'ditch' && y > 0.7)) return;
+    if ((o.kind === 'block' && y > 1.25) || (o.kind === 'ditch' && y > 0.75)) return;
 
-    // Car jump: if player jumps in front of the car, cleanly vault over it!
+    // Car jump: vault over the car with a properly timed jump!
     if (o.kind === 'car') {
-      if (G.air || y > 0.6 || o.dodged) {
+      if (y > 0.85 || o.dodged) {
         if (!o.dodged) {
           o.dodged = true;
           AudioEngine.jump();
@@ -1689,7 +1968,7 @@ function checkObstacles() {
 
     // Slide clears overhead scaffold!
     if (o.kind === 'overhead') {
-      if (G.slide > 0 || o.dodged) {
+      if ((G.slide > 0 && y < 0.65) || o.dodged) {
         if (!o.dodged) {
           o.dodged = true;
           AudioEngine.slide();
@@ -1701,7 +1980,7 @@ function checkObstacles() {
 
     o.hit = true;
 
-    // Shield / Immunity: Legal Shield absorbs 1 obstacle hit penalty-free!
+    // Shield / Immunity: Legal Shield absorbs 1 obstacle hit penalty-free & strike-free!
     if (G.shieldActive) {
       G.shieldActive = false;
       playerShield.visible = false;
@@ -1713,38 +1992,48 @@ function checkObstacles() {
       return;
     }
 
+    if (o.kind === 'police') {
+      G.hold = CFG.policeHold;
+      AudioEngine.police();
+      flashScreen('debuff');
+      toast('POLICE CHECKPOINT! HELD UP 4.0s', '#3a7bff');
+      return;
+    }
+
+    // 2-HIT FATAL CRASH SYSTEM
+    G.strikes++;
+    updateStrikesUI();
+
     if (o.kind === 'car') {
       G.balance -= 5000;
+      G.shake = 0.85;
+      o.group.visible = false;
+      AudioEngine.crash();
+      flashScreen('debuff');
+    } else if (o.kind === 'block') {
+      G.balance -= 3000;
       G.shake = 0.65;
       o.group.visible = false;
       AudioEngine.crash();
       flashScreen('debuff');
-      toast('CAR CRASH! -$5,000', '#ff3355');
-    } else if (o.kind === 'block') {
-      G.balance -= 3000;
-      G.shake = 0.45;
-      o.group.visible = false;
-      AudioEngine.crash();
-      flashScreen('debuff');
-      toast('ROADBLOCK HIT! -$3,000', '#ff5533');
     } else if (o.kind === 'ditch') {
       G.balance -= 3500;
       G.stun = 1.2;
-      G.shake = 0.45;
+      G.shake = 0.65;
       AudioEngine.crash();
       flashScreen('debuff');
-      toast('FELL IN POTHOLE! -$3,500', '#ff5533');
     } else if (o.kind === 'overhead') {
       G.balance -= 4000;
-      G.shake = 0.5;
+      G.shake = 0.7;
       AudioEngine.crash();
       flashScreen('debuff');
-      toast('HEAD BONK! -$4,000 (PRESS S TO SLIDE)', '#ff2244');
-    } else { // Police checkpoint
-      G.hold = CFG.policeHold;
-      AudioEngine.police();
-      flashScreen('debuff');
-      toast('POLICE CHECKPOINT! HELD UP', '#3a7bff');
+    }
+
+    if (G.strikes === 1) {
+      toast('⚠️ 1st CRASH! (1/2 STRIKES) NEXT HIT IS FATAL! ⚠️', '#ff2a55');
+    } else if (G.strikes >= 2) {
+      toast('💥 2nd CRASH! TOTAL LOSS! GAME OVER! 💥', '#ff0033');
+      gameOver(false, 'fatal_crash');
     }
   });
 }
@@ -1761,11 +2050,123 @@ function checkCollisions() {
   });
 }
 
+function triggerMarketEvent() {
+  const types = ['crypto', 'recession', 'ddos'].filter(t => t !== G.lastEventType);
+  const type = types[Math.floor(Math.random() * types.length)];
+  G.lastEventType = type;
+
+  let title, desc, cls;
+  if (type === 'crypto') {
+    title = '🚀 TECH BUBBLE / CRYPTO CRAZE!';
+    desc = 'Market euphoria! Cash everywhere, Speed +30%!';
+    cls = 'event-crypto';
+    G.eventSpeedMult = 1.30;
+    G.eventBurnMult = 1.0;
+  } else if (type === 'recession') {
+    title = '📉 MARKET RECESSION / CRASH!';
+    desc = 'Venture winter storm! Passive burn rate DOUBLED (2x)!';
+    cls = 'event-recession';
+    G.eventSpeedMult = 1.0;
+    G.eventBurnMult = 2.0;
+    rainSystem.visible = true;
+    AudioEngine.thunder();
+  } else {
+    title = '👾 VIRAL SERVER DDoS ATTACK!';
+    desc = 'Network flood! Screen glitching & Gate metrics scrambled!';
+    cls = 'event-ddos';
+    G.eventSpeedMult = 1.0;
+    G.eventBurnMult = 1.0;
+    document.body.classList.add('ddosActive');
+    scrambleGateTexts();
+  }
+
+  G.marketEvent = {
+    type,
+    timer: 15.0,
+    title,
+    desc,
+    cls
+  };
+
+  const banner = $('marketBanner');
+  banner.className = `ui ${cls}`;
+  $('marketBadge').textContent = '🚨 MARKET ALERT';
+  $('marketTitle').textContent = title;
+  $('marketDesc').textContent = desc;
+  $('marketTimer').textContent = '15.0s';
+  banner.classList.remove('hidden');
+
+  AudioEngine.marketAlert(type);
+  flashScreen(type === 'crypto' ? 'buff' : 'debuff');
+  toast(title, type === 'crypto' ? '#ffd700' : type === 'recession' ? '#ff2a55' : '#00ffcc');
+}
+
+function updateMarketEvent(dt) {
+  if (!G.marketEvent && G.time >= G.nextEventTime && G.phase === 'play') {
+    triggerMarketEvent();
+  }
+
+  if (G.marketEvent) {
+    G.marketEvent.timer -= dt;
+    $('marketTimer').textContent = Math.max(0, G.marketEvent.timer).toFixed(1) + 's';
+
+    if (G.marketEvent.type === 'crypto' && Math.random() < 0.28) {
+      spawnCryptoBonusWave(player.position.z - 42 - Math.random() * 18);
+    }
+
+    if (G.marketEvent.timer <= 0) {
+      endMarketEvent();
+    }
+  }
+}
+
+function endMarketEvent() {
+  if (!G.marketEvent) return;
+  G.marketEvent = null;
+  G.eventSpeedMult = 1.0;
+  G.eventBurnMult = 1.0;
+  rainSystem.visible = false;
+  document.body.classList.remove('ddosActive');
+  restoreGateTexts();
+
+  G.nextEventTime = G.time + 45 + Math.random() * 15;
+
+  const banner = $('marketBanner');
+  banner.className = 'ui event-crypto';
+  $('marketBadge').textContent = '✅ STABLE';
+  $('marketTitle').textContent = 'MARKET STABILIZED';
+  $('marketDesc').textContent = 'Macro conditions normalized. Back to baseline market.';
+  $('marketTimer').textContent = 'OK';
+  setTimeout(() => {
+    if (!G.marketEvent) banner.classList.add('hidden');
+  }, 2200);
+
+  toast('MARKET STABILIZED! Baseline resumed.', '#00ff88');
+}
+
+function spawnCryptoBonusWave(z) {
+  [0, 1, 2].forEach(lane => {
+    const x = CFG.lanes[lane];
+    if (Math.random() < 0.5) {
+      const g = makeCoinMesh();
+      g.position.set(x, 0.85, z);
+      scene.add(g);
+      collectibles.push({ kind: 'coin', value: 30, lane, group: g, z, initialY: 0.85, collected: false });
+    } else {
+      const g = makeCashMesh();
+      g.position.set(x, 0.85, z);
+      scene.add(g);
+      collectibles.push({ kind: 'cash', value: 100, lane, group: g, z, initialY: 0.85, collected: false });
+    }
+  });
+}
+
 function updateEconomy(dt) {
-  const burn = CFG.baseBurn * (1 + (G.time / 60) * CFG.burnGrowthPerMin) * G.burnMult;
+  const eventMult = G.eventBurnMult || 1.0;
+  const burn = CFG.baseBurn * (1 + (G.time / 60) * CFG.burnGrowthPerMin) * G.burnMult * eventMult;
   // Net burn is strictly positive drain (at least -$800/s drain even with staff),
   // ensuring the overall money always keeps steadily reducing over time!
-  const netBurn = Math.max(800, burn - G.income);
+  const netBurn = Math.max(800 * eventMult, burn - G.income);
   G.balance = Math.min(CFG.startBalance, G.balance - netBurn * dt);
   G.burnNow = netBurn;
 }
@@ -1801,14 +2202,20 @@ function renderBoard(scores, mine, id='board') {
     scores.map((s, i) => `<tr class="${s===mine || (mine && s.ts===mine.ts) ? 'me' : ''}"><td>${i+1}</td><td>${s.companyName.replace(/</g,'&lt;')}</td><td>${s.survivalTime}</td><td>${fmt(s.finalBalance)}</td></tr>`).join('');
 }
 
-function gameOver(won = false) {
+function gameOver(won = false, reason = 'bankruptcy') {
   G.phase = 'over';
   if (!won) {
     G.balance = Math.max(0, G.balance);
     AudioEngine.gameOver();
-    $('overTitle').textContent = 'BANKRUPT!';
-    $('overTitle').style.color = 'var(--debuff)';
-    $('overText').textContent = `${G.companyName} survived for ${mmss(G.time)} and covered ${Math.round(G.dist)}m before running out of funds.`;
+    if (reason === 'fatal_crash') {
+      $('overTitle').textContent = '💥 FATAL COLLISION! (2/2 STRIKES)';
+      $('overTitle').style.color = 'var(--debuff)';
+      $('overText').textContent = `${G.companyName} suffered 2 catastrophic collisions! The vehicle was totaled and operations collapsed after ${mmss(G.time)} (${Math.round(G.dist)}m).`;
+    } else {
+      $('overTitle').textContent = 'BANKRUPT!';
+      $('overTitle').style.color = 'var(--debuff)';
+      $('overText').textContent = `${G.companyName} survived for ${mmss(G.time)} and covered ${Math.round(G.dist)}m before running out of funds.`;
+    }
   } else {
     G.time = CFG.maxTime;
     AudioEngine.fanfare();
@@ -1828,13 +2235,14 @@ function gameOver(won = false) {
   const scores = saveScore(entry);
   renderBoard(scores, entry);
 
-  $('runStats').innerHTML = `Buffs: <span style="color:#00ff88">${G.buffsCount}</span> | Debuffs: <span style="color:#ff3355">${G.debuffsCount}</span> | Staff: <span style="color:#ffd21f">${G.staffCount}</span><br>Cash Pickups: <span style="color:#00ff88">${G.coinsCollected}</span> | Power-ups: <span style="color:#38bdf8">${G.powerupsCollected}</span> | Funding Rounds: <span style="color:#ffd21f">${G.milestonesReached}</span> | Max Tier: <span style="color:#ff7ad9">${G.currentTier}</span>`;
+  $('runStats').innerHTML = `Buffs: <span style="color:#00ff88">${G.buffsCount}</span> | Debuffs: <span style="color:#ff3355">${G.debuffsCount}</span> | Staff: <span style="color:#ffd21f">${G.staffCount}</span><br>Cash Pickups: <span style="color:#00ff88">${G.coinsCollected}</span> | Power-ups: <span style="color:#38bdf8">${G.powerupsCollected}</span> | Funding Rounds: <span style="color:#ffd21f">${G.milestonesReached}</span> | Strikes: <span style="color:${G.strikes>=2?'#ff2a55':'#00ff88'}">${G.strikes}/2</span>`;
 
   $('overModal').classList.remove('hidden');
   $('hud').classList.add('hidden');
   $('powerupsBar').classList.add('hidden');
   $('topControls').classList.add('hidden');
   $('holdBanner').classList.add('hidden');
+  $('marketBanner').classList.add('hidden');
 }
 
 function resetGame() {
@@ -1843,6 +2251,7 @@ function resetGame() {
   collectibles.forEach(c => scene.remove(c.group)); collectibles = [];
   boostPads.forEach(b => scene.remove(b.group)); boostPads = [];
   nextCollectibleZ = -15;
+  nextObstacleZ = -22;
   Object.assign(G, {
     balance: CFG.startBalance,
     time: 0,
@@ -1862,6 +2271,12 @@ function resetGame() {
     buffsCount: 0,
     debuffsCount: 0,
     staffCount: 0,
+    strikes: 0,
+    marketEvent: null,
+    nextEventTime: 45,
+    lastEventType: null,
+    eventSpeedMult: 1.0,
+    eventBurnMult: 1.0,
     magnetTimer: 0,
     shieldActive: false,
     boostTimer: 0,
@@ -1877,6 +2292,10 @@ function resetGame() {
   player.position.set(0, 0, 0);
   playerShield.visible = false;
   playerMagnetRing.visible = false;
+  rainSystem.visible = false;
+  document.body.classList.remove('ddosActive');
+  restoreGateTexts();
+  updateStrikesUI();
   camera.fov = 60;
   camera.updateProjectionMatrix();
   $('badgeShield').classList.add('hidden');
@@ -1884,6 +2303,7 @@ function resetGame() {
   $('badgeBoost').classList.add('hidden');
   $('powerupsBar').classList.add('hidden');
   $('holdBanner').classList.add('hidden');
+  $('marketBanner').classList.add('hidden');
   $('overTitle').textContent = 'BANKRUPT!';
   $('overTitle').style.color = 'var(--debuff)';
   // Reset all recyclable world objects (buildings, lamps, trees, etc.) to their
@@ -2081,7 +2501,8 @@ function loop() {
     G.slide = Math.max(0, G.slide - dt);
 
     const boostMult = G.boostTimer > 0 ? 1.45 : 1.0;
-    const speed = G.hold > 0 ? 0 : CFG.baseSpeed * G.speedMult * boostMult * (G.stun > 0 ? 0.45 : 1);
+    const eventSpeedMult = G.eventSpeedMult || 1.0;
+    const speed = G.hold > 0 ? 0 : CFG.baseSpeed * G.speedMult * boostMult * eventSpeedMult * (G.stun > 0 ? 0.45 : 1);
     player.position.z -= speed * dt;
     G.dist += speed * dt;
 
@@ -2138,6 +2559,7 @@ function loop() {
     updateGates(dt);
     updateObstacles(dt);
     updateCollectibles(dt);
+    updateMarketEvent(dt);
     checkMilestones();
     checkCollisions();
     checkObstacles();
@@ -2192,7 +2614,7 @@ function loop() {
       camera.position.y += (Math.random() - 0.5) * G.shake;
       G.shake -= dt * 1.6;
     }
-    updateWorld(player.position.z);
+    updateWorld(player.position.z, dt);
 
     // Difficulty Tiers: Day (0-450m) → Sunset (450-950m) → Night (950-1500m) → Neon Cyberpunk (1500m+)
     let tierIdx = 1;
@@ -2202,27 +2624,44 @@ function loop() {
     const targetSun = new THREE.Color();
     const targetHemiSky = new THREE.Color();
     const targetHemiGround = new THREE.Color();
+    const targetCloudCol = new THREE.Color(0xffffff);
     let targetSunInt = 1.5;
 
-    if (G.dist < 450) {
-      tierIdx = 1; tierName = 'DAY';
-      targetBg.set(0x7fd6ff); targetFog.set(0x7fd6ff); targetSun.set(0xfff0d0); targetSunInt = 1.5;
-      targetHemiSky.set(0xcfe3ff); targetHemiGround.set(0x4a3d55);
-    } else if (G.dist < 950) {
-      tierIdx = 2; tierName = 'SUNSET';
-      targetBg.set(0xf39c12); targetFog.set(0xdf7a28); targetSun.set(0xff8833); targetSunInt = 1.7;
-      targetHemiSky.set(0xffbb77); targetHemiGround.set(0x6a3045);
-    } else if (G.dist < 1500) {
-      tierIdx = 3; tierName = 'NIGHT';
-      targetBg.set(0x0c1224); targetFog.set(0x101a30); targetSun.set(0x7799cc); targetSunInt = 1.1;
-      targetHemiSky.set(0x334466); targetHemiGround.set(0x151822);
+    if (G.marketEvent && G.marketEvent.type === 'crypto') {
+      tierName = 'TECH BUBBLE 🚀';
+      targetBg.set(0xff9900); targetFog.set(0xdf7a28); targetSun.set(0xffd700); targetSunInt = 2.4;
+      targetHemiSky.set(0xffd57e); targetHemiGround.set(0x7c4700);
+      targetCloudCol.set(0xffe6a3);
+    } else if (G.marketEvent && G.marketEvent.type === 'recession') {
+      tierName = 'RECESSION 📉';
+      targetBg.set(0x1a232f); targetFog.set(0x222c38); targetSun.set(0x556677); targetSunInt = 0.5;
+      targetHemiSky.set(0x2d3a4b); targetHemiGround.set(0x14181f);
+      targetCloudCol.set(0x384759);
     } else {
-      tierIdx = 4; tierName = 'NEON CYBERPUNK';
-      targetBg.set(0x130424); targetFog.set(0x240638); targetSun.set(0xff0099); targetSunInt = 1.8;
-      targetHemiSky.set(0x00f0ff); targetHemiGround.set(0xff007f);
+      if (G.dist < 450) {
+        tierIdx = 1; tierName = 'DAY';
+        targetBg.set(0x7fd6ff); targetFog.set(0x7fd6ff); targetSun.set(0xfff0d0); targetSunInt = 1.5;
+        targetHemiSky.set(0xcfe3ff); targetHemiGround.set(0x4a3d55);
+        targetCloudCol.set(0xffffff);
+      } else if (G.dist < 950) {
+        tierIdx = 2; tierName = 'SUNSET';
+        targetBg.set(0xf39c12); targetFog.set(0xdf7a28); targetSun.set(0xff8833); targetSunInt = 1.7;
+        targetHemiSky.set(0xffbb77); targetHemiGround.set(0x6a3045);
+        targetCloudCol.set(0xffd2b3);
+      } else if (G.dist < 1500) {
+        tierIdx = 3; tierName = 'NIGHT';
+        targetBg.set(0x0c1224); targetFog.set(0x101a30); targetSun.set(0x7799cc); targetSunInt = 1.1;
+        targetHemiSky.set(0x334466); targetHemiGround.set(0x151822);
+        targetCloudCol.set(0x2e3b52);
+      } else {
+        tierIdx = 4; tierName = 'NEON CYBERPUNK';
+        targetBg.set(0x130424); targetFog.set(0x240638); targetSun.set(0xff0099); targetSunInt = 1.8;
+        targetHemiSky.set(0x00f0ff); targetHemiGround.set(0xff007f);
+        targetCloudCol.set(0x61286b);
+      }
     }
 
-    if (tierIdx !== G.currentTier) {
+    if (tierIdx !== G.currentTier && !G.marketEvent) {
       G.currentTier = tierIdx;
       const tierAnnounce = [
         '',
@@ -2243,14 +2682,16 @@ function loop() {
     sun.intensity += (targetSunInt - sun.intensity) * Math.min(1, dt * 2.5);
     hemiLight.color.lerp(targetHemiSky, Math.min(1, dt * 2.5));
     hemiLight.groundColor.lerp(targetHemiGround, Math.min(1, dt * 2.5));
+    cloudMat.color.lerp(targetCloudCol, Math.min(1, dt * 2.5));
 
     // Real-Time HUD Updates
     $('bal').textContent = fmt(G.balance);
     $('bal').classList.toggle('low', G.balance < 15000);
     $('timer').textContent = `SURVIVAL: ${mmss(G.time)} / ${mmss(CFG.maxTime)}`;
-    $('burnVal').textContent = '-' + fmt(G.burnNow) + '/s BURN';
+    const recTag = (G.marketEvent?.type === 'recession') ? ' ⚠️ 2x' : '';
+    $('burnVal').textContent = '-' + fmt(G.burnNow) + '/s BURN' + recTag;
     $('incomeVal').textContent = G.income ? `+${fmt(G.income)}/s REV` : '+0/s REV';
-    $('hudSub').textContent = `[TIER ${G.currentTier}: ${tierName}] SPEED x${(G.speedMult * boostMult).toFixed(2)} • DIST ${Math.round(G.dist)}m`;
+    $('hudSub').textContent = `[${tierName}] SPEED x${(G.speedMult * boostMult * eventSpeedMult).toFixed(2)} • DIST ${Math.round(G.dist)}m`;
 
     if (G.time >= CFG.maxTime) {
       gameOver(true); // 10 minutes maximum play time reached -> Unicorn IPO Victory!
