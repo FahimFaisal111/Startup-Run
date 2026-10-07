@@ -122,6 +122,14 @@ button:active{transform:scale(.97)!important}
 #holdBanner{border:0!important;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.4)!important}
 .guideBox{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.15)!important;border-radius:12px;color:#fff}
 table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
+
+/* Power-ups & Status HUD */
+#powerupsBar{position:fixed;top:122px;left:50%;transform:translateX(-50%);display:flex;gap:10px;pointer-events:none;z-index:12}
+.pBadge{background:rgba(18,22,40,.7);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:18px;padding:6px 14px;font-family:Inter,system-ui,sans-serif;font-weight:800;font-size:.9rem;color:#fff;display:flex;align-items:center;gap:6px;box-shadow:0 6px 20px rgba(0,0,0,.35);animation:pulseBadge 1.2s infinite alternate ease-in-out}
+#badgeShield{border-color:#38bdf8;color:#7dd3fc;box-shadow:0 0 16px rgba(56,189,248,.35)}
+#badgeMagnet{border-color:#f43f5e;color:#fda4af;box-shadow:0 0 16px rgba(244,63,94,.35)}
+#badgeBoost{border-color:#00ffcc;color:#6ee7b7;box-shadow:0 0 18px rgba(0,255,204,.45)}
+@keyframes pulseBadge{from{transform:scale(1)}to{transform:scale(1.05)}}
 </style>
 </head>
 <body>
@@ -141,7 +149,7 @@ table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
   <div class="card">
     <h1>STARTUP RUN 3D</h1>
     <p style="font-weight:700;color:#504a63;margin-bottom:6px">Entrepreneurship Simulator</p>
-    <p>A fresh founder in an NYC loft with $50,000 cash. Sprint through economic gates, balance burn rate, hire staff, and dodge financial ruins!</p>
+    <p>A fresh founder in an NYC loft with $60,000 cash runway (~1 minute to survive!). Sprint through economic gates, balance burn rate, hire staff, and dodge financial ruins!</p>
     <button id="startBtn">Start Game</button>
     <button id="guideBtn" style="background:#8fe5ff">How To Play</button>
     <button id="scoresBtn" style="background:#e8d5ff">High Scores</button>
@@ -150,26 +158,39 @@ table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
 
 <!-- Guide Modal -->
 <div id="guideModal" class="ui modal hidden">
-  <div class="card" style="max-width:560px">
+  <div class="card" style="max-width:620px;max-height:85vh;overflow-y:auto">
     <h2>FOUNDER'S SURVIVAL GUIDE</h2>
     <div class="guideGrid">
       <div class="guideBox" style="border-left:6px solid var(--buff)">
         <strong style="color:#009944">GREEN GATES (BUFFS)</strong>
-        Angel Seed Funding (+$25k)<br>Product Goes Viral (+$15k, Burn -10%)<br>Popularity Surge (+$20k, Burn -15%)
+        Angel Seed Funding (+$1,000)<br>Product Goes Viral (+$600, Burn -5%)<br>Popularity Surge (+$800, Burn -5%)
       </div>
       <div class="guideBox" style="border-left:6px solid var(--debuff)">
         <strong style="color:#cc1133">RED GATES (DEBUFFS)</strong>
-        AWS Server Outage (-$20k)<br>Tax Audit Penalty (-$35k)<br>Office Rent Overdue (-$18k)<br>Bank Debt Repayment (-$22k)
+        AWS Outage (-$3.5k)<br>Tax Audit Penalty (-$5k)<br>Office Rent Due (-$3k)<br>Bank Debt Due (-$4k)
       </div>
       <div class="guideBox" style="border-left:6px solid var(--trade)">
         <strong style="color:#b38600">YELLOW GATES (HIRE STAFF)</strong>
-        Hire Top Executive (-$10k, +$500/s)<br>Hire Core Tech Team (-$8k, +$400/s)
+        Hire Top Executive (-$2k, +$35/s REV)<br>Hire Core Tech Team (-$1.5k, +$25/s REV)
       </div>
       <div class="guideBox" style="border-left:6px solid #3a7bff">
         <strong style="color:#2a50cc">CONTROLS (SUBWAY STYLE)</strong>
         <strong>A / D or Left / Right:</strong> Change Lanes<br>
         <strong>W / Up / Space:</strong> Jump over blocks & potholes<br>
         <strong>S / Down:</strong> Slide under low scaffolds & fast-fall
+      </div>
+      <div class="guideBox" style="border-left:6px solid #00ffcc">
+        <strong style="color:#00ffcc">POWER-UPS & BOOST PADS</strong>
+        <strong>Coins & Cash:</strong> +$20-$100 cash to stretch runway<br>
+        <strong>🧲 Magnet:</strong> Attracts nearby cash for 10s<br>
+        <strong>🛡️ Legal Shield:</strong> Pass through 1 obstacle free<br>
+        <strong>⚡ Speed Boost:</strong> Speed burst + 2x Cash Multiplier!
+      </div>
+      <div class="guideBox" style="border-left:6px solid #ff7ad9">
+        <strong style="color:#ff7ad9">FUNDING MILESTONES & 10-MIN IPO</strong>
+        <strong>Milestones (Every 500m):</strong> Big Funding Rounds ($1k-$2.5k cash)!<br>
+        <strong>10-Min Limit:</strong> Survive the full 10:00 to ring the NASDAQ bell for a Unicorn IPO Exit!<br>
+        <strong>Difficulty Tiers:</strong> Day ☀️ → Sunset 🌅 → Night 🌙 → Neon Cyberpunk ⚡!
       </div>
     </div>
     <button id="guideBackBtn">Got It!</button>
@@ -218,7 +239,7 @@ table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
 <div id="hud" class="ui hidden">
   <div class="box">
     <div style="font-size:1rem;color:#ccc;letter-spacing:1px" id="companyBadge">COMPANY</div>
-    <div id="bal">$50,000</div>
+    <div id="bal">$60,000</div>
   </div>
   <div style="text-align:center">
     <div class="box" id="timer">SURVIVAL TIME: 00:00</div>
@@ -228,6 +249,13 @@ table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
     <div id="burnVal">-$1,000/s</div>
     <div id="incomeVal">+0/s REV</div>
   </div>
+</div>
+
+<!-- Active Power-ups Bar -->
+<div id="powerupsBar" class="ui hidden">
+  <div id="badgeShield" class="pBadge hidden">🛡️ LEGAL SHIELD</div>
+  <div id="badgeMagnet" class="pBadge hidden">🧲 MAGNET <span id="magTime">10.0s</span></div>
+  <div id="badgeBoost" class="pBadge hidden">⚡ BOOST 2x <span id="boostTime">4.5s</span></div>
 </div>
 
 <div id="toastContainer"></div>
@@ -244,7 +272,7 @@ table{color:#fff}th,td{border-bottom:1px solid rgba(255,255,255,.15)!important}
 <!-- Game Over Modal -->
 <div id="overModal" class="ui modal hidden">
   <div class="card">
-    <h2 style="color:var(--debuff)">BANKRUPT!</h2>
+    <h2 id="overTitle" style="color:var(--debuff)">BANKRUPT!</h2>
     <p id="overText"></p>
     <div id="runStats" style="font-size:.9rem;font-weight:700;margin-bottom:12px;color:#444"></div>
     <table id="board"></table>
@@ -344,6 +372,66 @@ const AudioEngine = {
     [440, 392, 349.2, 293.66, 220].forEach((f, i) => {
       setTimeout(() => this.tone(f, 0.38, 'sawtooth', 0.2), i * 160);
     });
+  },
+  coin() { // Crisp gold coin ping
+    this.init();
+    if (this.muted || !this.ctx) return;
+    try {
+      this.tone(987.77, 0.08, 'sine', 0.16);
+      setTimeout(() => this.tone(1318.51, 0.14, 'triangle', 0.18), 55);
+    } catch(e){}
+  },
+  magnet() { // Electric energy hum
+    this.init();
+    if (this.muted || !this.ctx) return;
+    try {
+      [440, 554.37, 659.25, 880].forEach((f, i) => {
+        setTimeout(() => this.tone(f, 0.12, 'sine', 0.15), i * 45);
+      });
+    } catch(e){}
+  },
+  shieldOn() { // Ascending forcefield chime
+    this.init();
+    if (this.muted || !this.ctx) return;
+    try {
+      [330, 440, 550, 660].forEach((f, i) => {
+        setTimeout(() => this.tone(f, 0.16, 'triangle', 0.18), i * 50);
+      });
+    } catch(e){}
+  },
+  shieldBreak() { // Forcefield deflection burst
+    this.init();
+    if (this.muted || !this.ctx) return;
+    try {
+      this.tone(520, 0.1, 'sawtooth', 0.25);
+      setTimeout(() => this.tone(260, 0.22, 'triangle', 0.28), 65);
+    } catch(e){}
+  },
+  boost() { // High-speed nitro whoosh
+    this.init();
+    if (this.muted || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.35);
+      g.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      g.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+      osc.connect(g);
+      g.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.4);
+    } catch(e){}
+  },
+  fanfare() { // Celebratory milestone arpeggio
+    this.init();
+    if (this.muted || !this.ctx) return;
+    try {
+      [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
+        setTimeout(() => this.tone(f, 0.22, 'triangle', 0.22), i * 85);
+      });
+    } catch(e){}
   }
 };
 
@@ -351,10 +439,11 @@ const AudioEngine = {
    MODULE 1: Game State Variables (-> future js/gameplay.js)
    ========================================================= */
 const CFG = {
+  maxTime: 600,   // 10 minutes (600 seconds) maximum play time
   slideTime: 0.4, // v1.1: was 0.75, quicker get-up
-  startBalance: 50000,
-  baseBurn: 1000,
-  burnGrowthPerMin: 1.0, // burn grows +100% per minute
+  startBalance: 60000, // $60,000 initial budget (lasts ~1 minute without collecting anything)
+  baseBurn: 1000,      // -$1,000/s base burn rate
+  burnGrowthPerMin: 0.10, // burn grows +10% per minute (~57s survival with 0 collections)
   baseSpeed: 16.5,
   speedStep: 1.02,
   speedEvery: 10,        // +2% every 10 seconds survived
@@ -385,7 +474,17 @@ const G = {
   paused: false,
   buffsCount: 0,
   debuffsCount: 0,
-  staffCount: 0
+  staffCount: 0,
+  // Power-ups & Milestone State
+  magnetTimer: 0,
+  shieldActive: false,
+  boostTimer: 0,
+  cashMultiplier: 1,
+  coinsCollected: 0,
+  powerupsCollected: 0,
+  milestonesReached: 0,
+  nextMilestoneDist: 500,
+  currentTier: 1
 };
 
 // Rich Decision Gate Matrix honoring Master Spec (Section 6) and user prompt:
@@ -396,74 +495,74 @@ const GATES = [
   {
     type: 'buff',
     title: 'ANGEL SEED INVESTMENT',
-    badge: '+$25,000 CASH',
+    badge: '+$1,000 CASH',
     color: 0x00ff88,
     textColor: '#00ff88',
-    apply: () => { G.balance += 25000; G.buffsCount++; AudioEngine.cash(); flashScreen('buff'); return '+$25,000 Angel Seed Investment!'; }
+    apply: () => { G.balance = Math.min(CFG.startBalance, G.balance + 1000); G.buffsCount++; AudioEngine.cash(); flashScreen('buff'); return '+$1,000 Angel Seed Investment!'; }
   },
   {
     type: 'buff',
     title: 'PRODUCT GOES VIRAL',
-    badge: '+$15k • BURN -10%',
+    badge: '+$600 • BURN -5%',
     color: 0x22ff88,
     textColor: '#22ff88',
-    apply: () => { G.balance += 15000; G.burnMult *= 0.9; G.buffsCount++; AudioEngine.cash(); flashScreen('buff'); return 'VIRAL HIT! +$15k & Burn -10%'; }
+    apply: () => { G.balance = Math.min(CFG.startBalance, G.balance + 600); G.burnMult *= 0.95; G.buffsCount++; AudioEngine.cash(); flashScreen('buff'); return 'VIRAL HIT! +$600 & Burn -5%'; }
   },
   {
     type: 'buff',
     title: 'POPULARITY SURGE',
-    badge: '+$20k • BURN -15%',
+    badge: '+$800 • BURN -5%',
     color: 0x00f0ff,
     textColor: '#00f0ff',
-    apply: () => { G.balance += 20000; G.burnMult *= 0.85; G.buffsCount++; AudioEngine.cash(); flashScreen('buff'); return 'POPULARITY SURGE! +$20k & Burn -15%'; }
+    apply: () => { G.balance = Math.min(CFG.startBalance, G.balance + 800); G.burnMult *= 0.95; G.buffsCount++; AudioEngine.cash(); flashScreen('buff'); return 'POPULARITY SURGE! +$800 & Burn -5%'; }
   },
   {
     type: 'debuff',
     title: 'AWS SERVER OUTAGE',
-    badge: '-$20,000 HIT',
+    badge: '-$3,500 HIT',
     color: 0xff3355,
     textColor: '#ff3355',
-    apply: () => { G.balance -= 20000; G.debuffsCount++; AudioEngine.debuff(); flashScreen('debuff'); return 'AWS SERVER CRASH! -$20,000'; }
+    apply: () => { G.balance -= 3500; G.debuffsCount++; AudioEngine.debuff(); flashScreen('debuff'); return 'AWS SERVER CRASH! -$3,500'; }
   },
   {
     type: 'debuff',
     title: 'UNEXPECTED TAX AUDIT',
-    badge: '-$35,000 PENALTY',
+    badge: '-$5,000 PENALTY',
     color: 0xff2244,
     textColor: '#ff2244',
-    apply: () => { G.balance -= 35000; G.debuffsCount++; AudioEngine.debuff(); flashScreen('debuff'); return 'IRS TAX AUDIT! -$35,000'; }
+    apply: () => { G.balance -= 5000; G.debuffsCount++; AudioEngine.debuff(); flashScreen('debuff'); return 'IRS TAX AUDIT! -$5,000'; }
   },
   {
     type: 'debuff',
     title: 'OFFICE RENT OVERDUE',
-    badge: '-$18,000 EVICTION RISK',
+    badge: '-$3,000 EVICTION RISK',
     color: 0xff5533,
     textColor: '#ff5533',
-    apply: () => { G.balance -= 18000; G.debuffsCount++; AudioEngine.debuff(); flashScreen('debuff'); return 'RENT OVERDUE! -$18,000'; }
+    apply: () => { G.balance -= 3000; G.debuffsCount++; AudioEngine.debuff(); flashScreen('debuff'); return 'RENT OVERDUE! -$3,000'; }
   },
   {
     type: 'debuff',
     title: 'BANK DEBT REPAYMENT',
-    badge: '-$22,000 INTEREST',
+    badge: '-$4,000 INTEREST',
     color: 0xcc2255,
     textColor: '#cc2255',
-    apply: () => { G.balance -= 22000; G.debuffsCount++; AudioEngine.debuff(); flashScreen('debuff'); return 'DEBT DUE! -$22,000'; }
+    apply: () => { G.balance -= 4000; G.debuffsCount++; AudioEngine.debuff(); flashScreen('debuff'); return 'DEBT DUE! -$4,000'; }
   },
   {
     type: 'trade',
     title: 'HIRE TOP EXECUTIVE',
-    badge: '-$10k • +$500/s REV',
+    badge: '-$2k • +$35/s REV',
     color: 0xffd21f,
     textColor: '#ffd21f',
-    apply: () => { G.balance -= 10000; G.income += 500; G.staffCount++; AudioEngine.trade(); flashScreen('trade'); return 'VP HIRED! -$10k Upfront, +$500/s Revenue'; }
+    apply: () => { G.balance -= 2000; G.income += 35; G.staffCount++; AudioEngine.trade(); flashScreen('trade'); return 'VP HIRED! -$2k Upfront, +$35/s Revenue'; }
   },
   {
     type: 'trade',
     title: 'HIRE CORE TECH TEAM',
-    badge: '-$8k • +$400/s REV',
+    badge: '-$1.5k • +$25/s REV',
     color: 0xffaa00,
     textColor: '#ffaa00',
-    apply: () => { G.balance -= 8000; G.income += 400; G.staffCount++; AudioEngine.trade(); flashScreen('trade'); return 'NEW STAFF HIRED! -$8k Upfront, +$400/s Revenue'; }
+    apply: () => { G.balance -= 1500; G.income += 25; G.staffCount++; AudioEngine.trade(); flashScreen('trade'); return 'NEW STAFF HIRED! -$1.5k Upfront, +$25/s Revenue'; }
   }
 ];
 
@@ -585,13 +684,56 @@ function makeHuman(o) { // v1.2: lathe-based smooth body, capsule limbs overlapp
 const P = makeHuman({ shirt: 0x3a7bff, pants: 0x2b2f55, skin: 0xf2c29b, hair: 0x2a1a12, shoes: 0xffffff, dir: -1 });
 const player = P.g;
 {
-  // Startup backpack with glowing emblem
-  const b = outline(new THREE.Mesh(new THREE.SphereGeometry(1, 12, 10), toon(0xff7ad9)), 1.05);
-  b.scale.set(0.38, 0.5, 0.22);
-  b.position.set(0, 1.6, 0.36);
-  b.castShadow = true;
-  player.add(b);
+  // Startup backpack
+  const bpGroup = new THREE.Group();
+  const bpBody = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.55, 0.22), toon(0x3a3a5c));
+  bpBody.position.set(0, 1.55, 0.28);
+  bpBody.castShadow = true;
+  bpGroup.add(bpBody);
+  // Top flap
+  const bpFlap = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.08, 0.24), toon(0x2e2e4a));
+  bpFlap.position.set(0, 1.84, 0.28);
+  bpGroup.add(bpFlap);
+  // Straps
+  [-0.16, 0.16].forEach(sx => {
+    const strap = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.45, 0.04), toon(0x2e2e4a));
+    strap.position.set(sx, 1.65, 0.16);
+    bpGroup.add(strap);
+  });
+  // Small logo patch
+  const patch = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.02), toon(0xff7ad9));
+  patch.position.set(0, 1.55, 0.40);
+  bpGroup.add(patch);
+  player.add(bpGroup);
 }
+// Shield bubble around player
+const playerShield = new THREE.Mesh(
+  new THREE.SphereGeometry(1.65, 20, 16),
+  new THREE.MeshStandardMaterial({
+    color: 0x38bdf8,
+    emissive: 0x0ea5e9,
+    emissiveIntensity: 0.9,
+    transparent: true,
+    opacity: 0.38,
+    roughness: 0.1,
+    metalness: 0.6,
+    side: THREE.DoubleSide
+  })
+);
+playerShield.position.set(0, 1.2, 0);
+playerShield.visible = false;
+player.add(playerShield);
+
+// Magnet pulse ring around player
+const playerMagnetRing = new THREE.Mesh(
+  new THREE.TorusGeometry(1.3, 0.04, 8, 24),
+  new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.85 })
+);
+playerMagnetRing.rotation.x = Math.PI / 2;
+playerMagnetRing.position.set(0, 0.35, 0);
+playerMagnetRing.visible = false;
+player.add(playerMagnetRing);
+
 scene.add(player);
 
 // ---- Intro Cutscene Office + NYC Facade (-> future js/cutscene.js) ----
@@ -618,14 +760,30 @@ box(1.3, 0.06, 0.9, 0x333333, -4, 1.15, -4.0, room); // Keyboard base
 box(0.24, 0.35, 0.24, 0xffffff, -2.8, 1.25, -4.2, room); // Coffee mug
 box(0.6, 0.8, 0.6, 0x333333, -4, 0.4, -3.2, room); // Office chair
 
-// Startup founder character working at desk
-const Founder = makeHuman({ shirt: 0x3a7bff, pants: 0x2b2f55, skin: 0xf2c29b, hair: 0x2a1a12, shoes: 0xffffff, dir: 1 });
+// Startup founder character working at desk (dir:-1 faces -z toward desk naturally)
+const Founder = makeHuman({ shirt: 0x3a7bff, pants: 0x2b2f55, skin: 0xf2c29b, hair: 0x2a1a12, shoes: 0xffffff, dir: -1 });
 const founderMesh = Founder.g;
-founderMesh.position.set(-4, 0.45, -3.2);
-founderMesh.rotation.y = Math.PI;
-Founder.armL.rotation.x = -1.2; Founder.armR.rotation.x = -1.2;
-Founder.legL.rotation.x = 1.3; Founder.legR.rotation.x = 1.3;
+founderMesh.position.set(-4, -0.15, -3.6);
+// Seated pose: thighs go forward (-z), shins hang down
+Founder.legL.rotation.x = -1.55; Founder.legR.rotation.x = -1.55;
+Founder.legL.shin.rotation.x = 1.55; Founder.legR.shin.rotation.x = 1.55;
+// Arms reach forward toward laptop keyboard
+Founder.armL.rotation.x = 0.75; Founder.armR.rotation.x = 0.75;
+Founder.armL.fore.rotation.x = 0.85; Founder.armR.fore.rotation.x = 0.85;
 room.add(founderMesh);
+
+// Two co-workers discussing in the right corner
+const CW1 = makeHuman({ shirt: 0xe67e22, pants: 0x2c3e50, skin: 0xd4a574, hair: 0x3a2a12, shoes: 0x222222, dir: 1 });
+const coworker1 = CW1.g;
+coworker1.position.set(4.8, 0, -1.8);
+coworker1.rotation.y = -0.3;  // angled toward coworker2
+room.add(coworker1);
+
+const CW2 = makeHuman({ shirt: 0x8e44ad, pants: 0x34495e, skin: 0xc68642, hair: 0x111111, shoes: 0x1a1a1a, dir: 1 });
+const coworker2 = CW2.g;
+coworker2.position.set(5.8, 0, -0.2);
+coworker2.rotation.y = Math.PI + 0.3;  // facing coworker1
+room.add(coworker2);
 
 // Couch, pizza, plant, beanbag
 box(2.6, 0.5, 1.4, 0xff6b6b, 4.5, 0.25, -4.6, room);
@@ -653,10 +811,23 @@ box(4.5, 2.75, 0.1, 0x444444, 1.2, 4, -5.88, room);
 const J = makeHuman({ shirt: 0x2fb67a, pants: 0x3b3b4f, skin: 0xc98f68, hair: 0x111111, shoes: 0x333333, dir: 1 });
 const janitor = J.g; janitor.scale.setScalar(1.2); room.add(janitor);
 {
-  const b = outline(mk(new THREE.BoxGeometry(0.08, 2, 0.08), toon(0x8a5a2b)), 1.1);
-  b.position.set(0, -0.5, 0.35); b.rotation.x = 0.3; J.armR.add(b);
-  const br = outline(mk(new THREE.BoxGeometry(0.6, 0.25, 0.3), toon(0xe0c070)), 1.1);
-  br.position.set(0, -1.45, 0.65); J.armR.add(br);
+  // Broom: single group so handle and brush stay connected
+  const broomGroup = new THREE.Group();
+  // Handle — long thin cylinder
+  const handle = mk(new THREE.CylinderGeometry(0.03, 0.04, 1.8, 8), toon(0x8a5a2b));
+  handle.position.set(0, -0.9, 0);
+  broomGroup.add(handle);
+  // Brush head — flat trapezoid shape at the bottom of the handle
+  const brushHead = mk(new THREE.BoxGeometry(0.45, 0.08, 0.18), toon(0xe0c070));
+  brushHead.position.set(0, -1.82, 0);
+  broomGroup.add(brushHead);
+  // Bristles — slightly below the brush head
+  const bristles = mk(new THREE.BoxGeometry(0.42, 0.12, 0.12), toon(0xc4a24a));
+  bristles.position.set(0, -1.9, 0);
+  broomGroup.add(bristles);
+  broomGroup.rotation.x = 0.35;
+  broomGroup.position.set(0.12, -0.15, 0.2);
+  J.armR.add(broomGroup);
 }
 
 // Light & Dust particles
@@ -696,7 +867,7 @@ const CAM_WINDOW = { pos: new THREE.Vector3(0, 3.6, 13.5), look: new THREE.Vecto
    ========================================================= */
 const world = new THREE.Group();
 scene.add(world);
-const L = 520, follow = [], rec = [];
+const L = 520, follow = [], rec = [], recInitialZ = [];
 
 // Realistic 3-Lane Asphalt Road with Crosswalks
 const roadTex = (() => {
@@ -803,21 +974,21 @@ for(let i=0; i<18; i++) [-1, 1].forEach((s, si) => {
     bb.rotation.y = s > 0 ? -Math.PI/2 : Math.PI/2;
     b.add(bb);
   }
-  world.add(b); rec.push(b);
+  world.add(b); rec.push(b); recInitialZ.push(b.position.z);
 
   // Street Lamps
   const lamp = new THREE.Group(); lamp.position.set(s*6.8, 0, -i*30 - 5);
   const pole = mk(new THREE.CylinderGeometry(0.08, 0.11, 5.2, 8), toon(0x333344)); pole.position.y = 2.6; lamp.add(pole);
   const arm = mk(new THREE.BoxGeometry(1.1, 0.1, 0.1), toon(0x333344)); arm.position.set(-s*0.55, 5.2, 0); lamp.add(arm);
   const bulb = mk(new THREE.SphereGeometry(0.26, 8, 8), new THREE.MeshBasicMaterial({ color: 0xfff2a8 })); bulb.position.set(-s*1.05, 5.1, 0); lamp.add(bulb);
-  world.add(lamp); rec.push(lamp);
+  world.add(lamp); rec.push(lamp); recInitialZ.push(lamp.position.z);
 
   // Street Trees
   const tree = new THREE.Group(); tree.position.set(s*9.5, 0, -i*30 - 20);
   const tr = outline(mk(new THREE.CylinderGeometry(0.22, 0.3, 1.7, 8), toon(0x7a4a2a)), 1.1); tr.position.y = 0.85; tree.add(tr);
   const c1 = outline(mk(new THREE.SphereGeometry(1.4, 10, 8), toon(0x3fbf6a)), 1.05); c1.position.y = 2.6; tree.add(c1);
   const c2 = outline(mk(new THREE.SphereGeometry(1.1, 10, 8), toon(0x62d98a)), 1.05); c2.position.set(0.3, 3.7, 0); tree.add(c2);
-  world.add(tree); rec.push(tree);
+  world.add(tree); rec.push(tree); recInitialZ.push(tree.position.z);
 });
 
 // Hydrants & Trash Cans
@@ -830,7 +1001,7 @@ for(let i=0; i<32; i++){
     const a = outline(mk(new THREE.CylinderGeometry(0.4, 0.35, 1, 12), toon(0x4d5b55)), 1.06); a.position.y = 0.5; h.add(a);
     const b = mk(new THREE.CylinderGeometry(0.43, 0.43, 0.1, 12), toon(0x333b38)); b.position.y = 1.05; h.add(b);
   }
-  world.add(h); rec.push(h);
+  world.add(h); rec.push(h); recInitialZ.push(h.position.z);
 }
 
 // Clouds & Sun
@@ -841,7 +1012,7 @@ for(let i=0; i<8; i++){
     m.position.set(x,y,z); c.add(m);
   });
   c.position.set((Math.random()-.5)*120, 38+Math.random()*14, -Math.random()*480);
-  world.add(c); rec.push(c);
+  world.add(c); rec.push(c); recInitialZ.push(c.position.z);
 }
 const sunM = mk(new THREE.SphereGeometry(10, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff09a, fog: false }));
 world.add(sunM);
@@ -878,6 +1049,7 @@ function toMenu() {
   $('menu').classList.remove('hidden');
   $('runBtn').classList.add('hidden');
   $('topControls').classList.add('hidden');
+  $('powerupsBar').classList.add('hidden');
   document.body.classList.remove('run');
   G.phase = 'menu';
   camT = 999;
@@ -1074,7 +1246,9 @@ function spawnObstacle(z) {
     const car = makeCar([0xe74c3c, 0xf1c40f, 0x2ecc71, 0x9b59b6, 0xecf0f1][Math.floor(Math.random()*5)]);
     g.add(car);
     g.position.set(x, 0, z - 12);
-    o = { kind: 'car', lanes: [lane], z: z - 12, speed: 8, group: g };
+    const tierSpeeds = [0, 8, 11, 14, 18];
+    const carSpeed = tierSpeeds[G.currentTier || 1] || 8;
+    o = { kind: 'car', lanes: [lane], z: z - 12, speed: carSpeed, group: g };
   } else if (r < 0.48) { // Road Barrier (Jump over)
     box(3, 0.5, 0.2, 0xd63031, 0, 1.0, 0, g);
     [-1, 0, 1].forEach(k => box(0.5, 0.5, 0.22, 0xffffff, k, 1.0, 0, g));
@@ -1138,10 +1312,350 @@ function updateObstacles(dt) {
 }
 
 /* =========================================================
+   MODULE 4c: Collectibles, Power-ups, Speed Pads & Milestones
+   1. Coins (+$20 - $30)
+   2. Cash Bundles (+$80 - $100)
+   3. Magnet Power-up (Draws nearby pickups for 10s)
+   4. Legal Shield (Immunity bubble that absorbs 1 obstacle hit)
+   5. Speed Boost Pads (Glowing strips on road: speed burst + 2x Cash)
+   6. Milestone Funding Rounds (Chest/Event every 500m with cash injections)
+   ========================================================= */
+let collectibles = [];
+let boostPads = [];
+let nextCollectibleZ = -15;
+
+const coinGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.08, 16);
+const coinMat = new THREE.MeshStandardMaterial({
+  color: 0xffd700,
+  metalness: 0.85,
+  roughness: 0.2,
+  emissive: 0xb8860b,
+  emissiveIntensity: 0.35
+});
+const coinInnerGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.09, 16);
+const coinInnerMat = new THREE.MeshBasicMaterial({ color: 0xfff070 });
+
+function makeCoinMesh() {
+  const g = new THREE.Group();
+  const c = new THREE.Mesh(coinGeo, coinMat);
+  c.rotation.x = Math.PI / 2;
+  g.add(c);
+  const inner = new THREE.Mesh(coinInnerGeo, coinInnerMat);
+  inner.rotation.x = Math.PI / 2;
+  g.add(inner);
+  return g;
+}
+
+function makeCashMesh() {
+  const g = new THREE.Group();
+  const stack = new THREE.Mesh(
+    new THREE.BoxGeometry(0.72, 0.14, 0.38),
+    new THREE.MeshStandardMaterial({
+      color: 0x27ae60,
+      roughness: 0.35,
+      metalness: 0.1,
+      emissive: 0x1e824c,
+      emissiveIntensity: 0.3
+    })
+  );
+  g.add(stack);
+  const band = new THREE.Mesh(
+    new THREE.BoxGeometry(0.22, 0.15, 0.39),
+    new THREE.MeshStandardMaterial({ color: 0xfff6d6, roughness: 0.5 })
+  );
+  g.add(band);
+  return g;
+}
+
+function makeMagnetMesh() {
+  const g = new THREE.Group();
+  const arch = new THREE.Mesh(
+    new THREE.TorusGeometry(0.38, 0.11, 10, 16, Math.PI),
+    new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.5, roughness: 0.25, emissive: 0xb91c1c, emissiveIntensity: 0.2 })
+  );
+  arch.rotation.z = Math.PI;
+  g.add(arch);
+  [-0.38, 0.38].forEach(x => {
+    const arm = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.11, 0.11, 0.28, 12),
+      new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.5, roughness: 0.25 })
+    );
+    arm.position.set(x, -0.14, 0);
+    g.add(arm);
+    const tip = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.11, 0.11, 0.2, 12),
+      new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.2 })
+    );
+    tip.position.set(x, -0.36, 0);
+    g.add(tip);
+  });
+  const aura = new THREE.Mesh(
+    new THREE.TorusGeometry(0.68, 0.03, 8, 20),
+    new THREE.MeshBasicMaterial({ color: 0x00f0ff })
+  );
+  g.add(aura);
+  return g;
+}
+
+function makeShieldPickupMesh() {
+  const g = new THREE.Group();
+  const crest = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.5, 0.38, 0.12, 6),
+    new THREE.MeshStandardMaterial({
+      color: 0x0284c7,
+      metalness: 0.7,
+      roughness: 0.2,
+      emissive: 0x0369a1,
+      emissiveIntensity: 0.6
+    })
+  );
+  crest.rotation.x = Math.PI / 2;
+  g.add(crest);
+  const cross1 = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.52, 0.14), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+  const cross2 = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.16, 0.14), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+  g.add(cross1); g.add(cross2);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.03, 8, 20), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+  g.add(ring);
+  return g;
+}
+
+const padTex = (() => {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 256; const g = c.getContext('2d');
+  g.fillStyle = '#061325'; g.fillRect(0, 0, 128, 256);
+  g.strokeStyle = '#00ffcc'; g.lineWidth = 16; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.shadowColor = '#00ffcc'; g.shadowBlur = 18;
+  for (let y = 35; y < 256; y += 65) {
+    g.beginPath();
+    g.moveTo(22, y + 26);
+    g.lineTo(64, y - 8);
+    g.lineTo(106, y + 26);
+    g.stroke();
+  }
+  return new THREE.CanvasTexture(c);
+})();
+
+function makeBoostPadMesh() {
+  const g = new THREE.Group();
+  const pad = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.8, 5.0),
+    new THREE.MeshStandardMaterial({
+      map: padTex,
+      roughness: 0.2,
+      metalness: 0.8,
+      emissive: 0x00ffcc,
+      emissiveIntensity: 0.55
+    })
+  );
+  pad.rotation.x = -Math.PI / 2;
+  pad.position.y = 0.04;
+  g.add(pad);
+  [-1.4, 1.4].forEach(x => {
+    const rail = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08, 0.06, 5.0),
+      new THREE.MeshBasicMaterial({ color: 0x00ffcc })
+    );
+    rail.position.set(x, 0.05, 0);
+    g.add(rail);
+  });
+  return g;
+}
+
+function makeChestMesh() {
+  const g = new THREE.Group();
+  const base = new THREE.Mesh(
+    new THREE.BoxGeometry(1.6, 0.8, 1.0),
+    new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.2, emissive: 0xb45309, emissiveIntensity: 0.4 })
+  );
+  base.position.y = 0.4;
+  g.add(base);
+  const lid = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.5, 0.5, 1.6, 16, 1, false, 0, Math.PI),
+    new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.2, emissive: 0xb45309, emissiveIntensity: 0.4 })
+  );
+  lid.rotation.z = Math.PI / 2;
+  lid.position.set(0, 0.8, 0);
+  g.add(lid);
+  const lock = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.24, 0.12), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9 }));
+  lock.position.set(0, 0.5, 0.52);
+  g.add(lock);
+  const aura = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.04, 8, 24), new THREE.MeshBasicMaterial({ color: 0xffea00 }));
+  g.add(aura);
+  return g;
+}
+
+function spawnCollectibleChunk(z) {
+  const r = Math.random();
+  const lane = Math.floor(Math.random() * 3);
+  const x = CFG.lanes[lane];
+
+  if (r < 0.52) {
+    // 1. Coin Line (3 coins, +$20 or +$30 each)
+    const val = Math.random() < 0.3 ? 30 : 20;
+    for (let i = 0; i < 3; i++) {
+      const cz = z - i * 3.2;
+      const g = makeCoinMesh();
+      g.position.set(x, 0.85, cz);
+      scene.add(g);
+      collectibles.push({ kind: 'coin', value: val, lane, group: g, z: cz, initialY: 0.85, collected: false });
+    }
+  } else if (r < 0.68) {
+    // 2. Cash Stack ($80 or $100)
+    const val = Math.random() < 0.5 ? 100 : 80;
+    const g = makeCashMesh();
+    g.position.set(x, 0.85, z);
+    scene.add(g);
+    collectibles.push({ kind: 'cash', value: val, lane, group: g, z, initialY: 0.85, collected: false });
+  } else if (r < 0.82) {
+    // 3. Speed Boost Pad
+    const g = makeBoostPadMesh();
+    g.position.set(x, 0, z);
+    scene.add(g);
+    boostPads.push({ lane, z, group: g, triggered: false });
+    // Bonus coins on the boost strip
+    for (let i = -1; i <= 1; i += 2) {
+      const cg = makeCoinMesh();
+      cg.position.set(x, 0.85, z + i * 1.5);
+      scene.add(cg);
+      collectibles.push({ kind: 'coin', value: 25, lane, group: cg, z: z + i * 1.5, initialY: 0.85, collected: false });
+    }
+  } else if (r < 0.91) {
+    // 4. Magnet Power-up
+    const g = makeMagnetMesh();
+    g.position.set(x, 1.1, z);
+    scene.add(g);
+    collectibles.push({ kind: 'magnet', lane, group: g, z, initialY: 1.1, collected: false });
+  } else {
+    // 5. Legal Shield Power-up
+    const g = makeShieldPickupMesh();
+    g.position.set(x, 1.1, z);
+    scene.add(g);
+    collectibles.push({ kind: 'shield', lane, group: g, z, initialY: 1.1, collected: false });
+  }
+}
+
+const MILESTONE_ROUNDS = [
+  { dist: 500, title: 'ANGEL SEED EXPANSION', bonus: 1000 },
+  { dist: 1000, title: 'SERIES A FUNDING ROUND', bonus: 1200 },
+  { dist: 1500, title: 'SERIES B GROWTH ROUND', bonus: 1500 },
+  { dist: 2000, title: 'SERIES C UNICORN ROUND', bonus: 1800 },
+  { dist: 2500, title: 'PRE-IPO MEGAROUND', bonus: 2000 }
+];
+
+function awardMilestoneFunding(dist, title, bonus) {
+  G.balance = Math.min(CFG.startBalance, G.balance + bonus);
+  G.milestonesReached++;
+  AudioEngine.fanfare();
+  flashScreen('trade');
+  toast(`🏆 ${title}! +${fmt(bonus)} CASH INJECTED! 🍾`, '#ffd700');
+}
+
+function checkMilestones() {
+  while (G.dist >= G.nextMilestoneDist) {
+    const mDist = G.nextMilestoneDist;
+    const round = MILESTONE_ROUNDS.find(m => m.dist === mDist) || {
+      dist: mDist,
+      title: `SCALE-UP ROUND (${mDist}m)`,
+      bonus: 2000
+    };
+    awardMilestoneFunding(mDist, round.title, round.bonus);
+    G.nextMilestoneDist += 500;
+  }
+}
+
+function updateCollectibles(dt) {
+  while (nextCollectibleZ > player.position.z - 240) {
+    spawnCollectibleChunk(nextCollectibleZ);
+    nextCollectibleZ -= 28;
+  }
+
+  const t = performance.now() / 1000;
+
+  collectibles = collectibles.filter(item => {
+    if (item.collected) {
+      scene.remove(item.group);
+      return false;
+    }
+
+    item.group.rotation.y += dt * 3.5;
+    item.group.position.y = item.initialY + Math.sin(t * 4 + item.z * 0.1) * 0.15;
+
+    // Magnet Attraction towards runner
+    if (G.magnetTimer > 0 && (item.kind === 'coin' || item.kind === 'cash')) {
+      const dx = player.position.x - item.group.position.x;
+      const dy = (player.position.y + 0.9) - item.group.position.y;
+      const dz = player.position.z - item.group.position.z;
+      const dist = Math.hypot(dx, dz);
+      if (dist < 22) {
+        const pullSpeed = Math.min(36, 16 + (22 - dist) * 1.6);
+        item.group.position.x += (dx / (dist || 1)) * pullSpeed * dt;
+        item.group.position.y += (dy / (dist || 1)) * pullSpeed * dt;
+        item.group.position.z += (dz / (dist || 1)) * pullSpeed * dt;
+      }
+    }
+
+    // Player pickup collision
+    const xDist = Math.abs(player.position.x - item.group.position.x);
+    const zDist = Math.abs(player.position.z - item.group.position.z);
+    const yDist = Math.abs(player.position.y - item.group.position.y);
+
+    if (zDist < 1.4 && xDist < 1.25 && yDist < 1.8) {
+      item.collected = true;
+      if (item.kind === 'coin' || item.kind === 'cash') {
+        const payout = item.value * G.cashMultiplier;
+        G.balance = Math.min(CFG.startBalance, G.balance + payout);
+        G.coinsCollected++;
+        AudioEngine.coin();
+        toast('+' + fmt(payout) + (G.cashMultiplier > 1 ? ' (2x BOOST!)' : ''), '#00ff88');
+      } else if (item.kind === 'magnet') {
+        G.magnetTimer = 10;
+        G.powerupsCollected++;
+        AudioEngine.magnet();
+        flashScreen('buff');
+        toast('🧲 CASH MAGNET ACTIVATED! (10s)', '#f43f5e');
+      } else if (item.kind === 'shield') {
+        G.shieldActive = true;
+        playerShield.visible = true;
+        G.powerupsCollected++;
+        AudioEngine.shieldOn();
+        flashScreen('buff');
+        toast('🛡️ LEGAL SHIELD ACTIVATED! (Blocks 1 Hit)', '#38bdf8');
+      }
+      scene.remove(item.group);
+      return false;
+    }
+
+    if (item.group.position.z > player.position.z + 18) {
+      scene.remove(item.group);
+      return false;
+    }
+    return true;
+  });
+
+  boostPads = boostPads.filter(pad => {
+    if (pad.z > player.position.z + 18) {
+      scene.remove(pad.group);
+      return false;
+    }
+    if (!pad.triggered && Math.abs(pad.z - player.position.z) < 2.2 && Math.abs(player.position.x - CFG.lanes[pad.lane]) < 1.4 && player.position.y < 0.6) {
+      pad.triggered = true;
+      G.boostTimer = 4.5;
+      G.cashMultiplier = 2;
+      AudioEngine.boost();
+      flashScreen('trade');
+      toast('⚡ SPEED BOOST! 2x CASH MULTIPLIER! 🚀', '#00ffcc');
+    }
+    return true;
+  });
+}
+
+/* =========================================================
    MODULE 5: Collision Detection & Economy (-> js/gameplay.js)
    ========================================================= */
 function toast(msg, color='#fff') {
   const container = $('toastContainer');
+  while (container.children.length >= 3) {
+    container.firstElementChild.remove();
+  }
   const el = document.createElement('div');
   el.className = 'toastPop';
   el.textContent = msg;
@@ -1175,41 +1689,57 @@ function checkObstacles() {
 
     // Slide clears overhead scaffold!
     if (o.kind === 'overhead') {
-      if (G.slide > 0) {
-        AudioEngine.slide();
-        toast('SLICK SLIDE! DODGED OVERHEAD', '#ffd21f');
+      if (G.slide > 0 || o.dodged) {
+        if (!o.dodged) {
+          o.dodged = true;
+          AudioEngine.slide();
+          toast('SLICK SLIDE! DODGED OVERHEAD', '#ffd21f');
+        }
         return;
       }
     }
 
     o.hit = true;
+
+    // Shield / Immunity: Legal Shield absorbs 1 obstacle hit penalty-free!
+    if (G.shieldActive) {
+      G.shieldActive = false;
+      playerShield.visible = false;
+      $('badgeShield').classList.add('hidden');
+      if (o.kind === 'car' || o.kind === 'block') o.group.visible = false;
+      AudioEngine.shieldBreak();
+      flashScreen('buff');
+      toast('🛡️ LEGAL SHIELD BROKE! PENALTY PREVENTED! 🛡️', '#38bdf8');
+      return;
+    }
+
     if (o.kind === 'car') {
-      G.balance -= 15000;
+      G.balance -= 5000;
       G.shake = 0.65;
       o.group.visible = false;
       AudioEngine.crash();
       flashScreen('debuff');
-      toast('CAR CRASH! -$15,000', '#ff3355');
+      toast('CAR CRASH! -$5,000', '#ff3355');
     } else if (o.kind === 'block') {
-      G.balance -= 8000;
+      G.balance -= 3000;
       G.shake = 0.45;
       o.group.visible = false;
       AudioEngine.crash();
       flashScreen('debuff');
-      toast('ROADBLOCK HIT! -$8,000', '#ff5533');
+      toast('ROADBLOCK HIT! -$3,000', '#ff5533');
     } else if (o.kind === 'ditch') {
-      G.balance -= 10000;
+      G.balance -= 3500;
       G.stun = 1.2;
       G.shake = 0.45;
       AudioEngine.crash();
       flashScreen('debuff');
-      toast('FELL IN POTHOLE! -$10,000', '#ff5533');
+      toast('FELL IN POTHOLE! -$3,500', '#ff5533');
     } else if (o.kind === 'overhead') {
-      G.balance -= 12000;
+      G.balance -= 4000;
       G.shake = 0.5;
       AudioEngine.crash();
       flashScreen('debuff');
-      toast('HEAD BONK! -$12,000 (PRESS S TO SLIDE)', '#ff2244');
+      toast('HEAD BONK! -$4,000 (PRESS S TO SLIDE)', '#ff2244');
     } else { // Police checkpoint
       G.hold = CFG.policeHold;
       AudioEngine.police();
@@ -1233,8 +1763,11 @@ function checkCollisions() {
 
 function updateEconomy(dt) {
   const burn = CFG.baseBurn * (1 + (G.time / 60) * CFG.burnGrowthPerMin) * G.burnMult;
-  G.balance += (G.income - burn) * dt;
-  G.burnNow = burn;
+  // Net burn is strictly positive drain (at least -$800/s drain even with staff),
+  // ensuring the overall money always keeps steadily reducing over time!
+  const netBurn = Math.max(800, burn - G.income);
+  G.balance = Math.min(CFG.startBalance, G.balance - netBurn * dt);
+  G.burnNow = netBurn;
 }
 
 /* =========================================================
@@ -1268,10 +1801,22 @@ function renderBoard(scores, mine, id='board') {
     scores.map((s, i) => `<tr class="${s===mine || (mine && s.ts===mine.ts) ? 'me' : ''}"><td>${i+1}</td><td>${s.companyName.replace(/</g,'&lt;')}</td><td>${s.survivalTime}</td><td>${fmt(s.finalBalance)}</td></tr>`).join('');
 }
 
-function gameOver() {
+function gameOver(won = false) {
   G.phase = 'over';
-  G.balance = Math.min(G.balance, 0);
-  AudioEngine.gameOver();
+  if (!won) {
+    G.balance = Math.max(0, G.balance);
+    AudioEngine.gameOver();
+    $('overTitle').textContent = 'BANKRUPT!';
+    $('overTitle').style.color = 'var(--debuff)';
+    $('overText').textContent = `${G.companyName} survived for ${mmss(G.time)} and covered ${Math.round(G.dist)}m before running out of funds.`;
+  } else {
+    G.time = CFG.maxTime;
+    AudioEngine.fanfare();
+    flashScreen('trade');
+    $('overTitle').textContent = '🦄 10-MIN UNICORN IPO EXIT! 🔔';
+    $('overTitle').style.color = 'var(--buff)';
+    $('overText').textContent = `CONGRATULATIONS! ${G.companyName} survived the full 10:00 minute market gauntlet, rang the Nasdaq bell, and took the startup public with ${fmt(G.balance)} in cash reserves!`;
+  }
 
   const entry = {
     companyName: G.companyName,
@@ -1283,11 +1828,11 @@ function gameOver() {
   const scores = saveScore(entry);
   renderBoard(scores, entry);
 
-  $('overText').textContent = `${G.companyName} survived for ${mmss(G.time)} and covered ${Math.round(G.dist)}m before running out of funds.`;
-  $('runStats').innerHTML = `Buffs Collected: <span style="color:#009944">${G.buffsCount}</span> | Debuffs Hit: <span style="color:#cc1133">${G.debuffsCount}</span> | Team Hired: <span style="color:#b38600">${G.staffCount}</span>`;
+  $('runStats').innerHTML = `Buffs: <span style="color:#00ff88">${G.buffsCount}</span> | Debuffs: <span style="color:#ff3355">${G.debuffsCount}</span> | Staff: <span style="color:#ffd21f">${G.staffCount}</span><br>Cash Pickups: <span style="color:#00ff88">${G.coinsCollected}</span> | Power-ups: <span style="color:#38bdf8">${G.powerupsCollected}</span> | Funding Rounds: <span style="color:#ffd21f">${G.milestonesReached}</span> | Max Tier: <span style="color:#ff7ad9">${G.currentTier}</span>`;
 
   $('overModal').classList.remove('hidden');
   $('hud').classList.add('hidden');
+  $('powerupsBar').classList.add('hidden');
   $('topControls').classList.add('hidden');
   $('holdBanner').classList.add('hidden');
 }
@@ -1295,6 +1840,9 @@ function gameOver() {
 function resetGame() {
   gates.forEach(g => scene.remove(g.group)); gates = [];
   obs.forEach(o => scene.remove(o.group)); obs = [];
+  collectibles.forEach(c => scene.remove(c.group)); collectibles = [];
+  boostPads.forEach(b => scene.remove(b.group)); boostPads = [];
+  nextCollectibleZ = -15;
   Object.assign(G, {
     balance: CFG.startBalance,
     time: 0,
@@ -1313,12 +1861,37 @@ function resetGame() {
     paused: false,
     buffsCount: 0,
     debuffsCount: 0,
-    staffCount: 0
+    staffCount: 0,
+    magnetTimer: 0,
+    shieldActive: false,
+    boostTimer: 0,
+    cashMultiplier: 1,
+    coinsCollected: 0,
+    powerupsCollected: 0,
+    milestonesReached: 0,
+    nextMilestoneDist: 500,
+    currentTier: 1
   });
   player.rotation.set(0, 0, 0);
   player.scale.set(1, 1, 1);
   player.position.set(0, 0, 0);
+  playerShield.visible = false;
+  playerMagnetRing.visible = false;
+  camera.fov = 60;
+  camera.updateProjectionMatrix();
+  $('badgeShield').classList.add('hidden');
+  $('badgeMagnet').classList.add('hidden');
+  $('badgeBoost').classList.add('hidden');
+  $('powerupsBar').classList.add('hidden');
   $('holdBanner').classList.add('hidden');
+  $('overTitle').textContent = 'BANKRUPT!';
+  $('overTitle').style.color = 'var(--debuff)';
+  // Reset all recyclable world objects (buildings, lamps, trees, etc.) to their
+  // initial positions so they appear correctly after a restart.
+  for (let i = 0; i < rec.length; i++) {
+    rec[i].position.z = recInitialZ[i];
+  }
+  updateWorld(0);
 }
 
 /* =========================================================
@@ -1469,8 +2042,19 @@ function loop() {
     J.legR.rotation.x = -Math.sin(t * 5) * 0.4;
 
     // Founder working typing on laptop
-    Founder.armL.rotation.x = -1.2 + Math.sin(t * 14) * 0.12;
-    Founder.armR.rotation.x = -1.2 + Math.cos(t * 14) * 0.12;
+    Founder.armL.fore.rotation.x = 0.85 + Math.sin(t * 14) * 0.1;
+    Founder.armR.fore.rotation.x = 0.85 + Math.cos(t * 14) * 0.1;
+
+    // Co-workers discussing: alternating arm gestures
+    CW1.armR.rotation.x = -0.4 + Math.sin(t * 2.5) * 0.35;
+    CW1.armR.fore.rotation.x = 0.5 + Math.sin(t * 2.5) * 0.25;
+    CW1.armL.rotation.x = Math.sin(t * 1.8 + 1) * 0.15;
+    CW2.armL.rotation.x = -0.3 + Math.cos(t * 2.0) * 0.3;
+    CW2.armL.fore.rotation.x = 0.4 + Math.cos(t * 2.0) * 0.2;
+    CW2.armR.rotation.x = Math.cos(t * 1.5 + 2) * 0.15;
+    // Subtle body sway while talking
+    coworker1.rotation.z = Math.sin(t * 1.2) * 0.03;
+    coworker2.rotation.z = Math.cos(t * 1.0) * 0.03;
 
     dust.rotation.y = t * 0.05;
   } else if (G.phase === 'transition') {
@@ -1485,6 +2069,7 @@ function loop() {
     if (camBlend >= 1) {
       G.phase = 'play';
       $('hud').classList.remove('hidden');
+      $('powerupsBar').classList.remove('hidden');
       $('topControls').classList.remove('hidden');
     }
   } else if (G.phase === 'play' && !G.paused) {
@@ -1495,7 +2080,8 @@ function loop() {
     G.stun = Math.max(0, G.stun - dt);
     G.slide = Math.max(0, G.slide - dt);
 
-    const speed = G.hold > 0 ? 0 : CFG.baseSpeed * G.speedMult * (G.stun > 0 ? 0.45 : 1);
+    const boostMult = G.boostTimer > 0 ? 1.45 : 1.0;
+    const speed = G.hold > 0 ? 0 : CFG.baseSpeed * G.speedMult * boostMult * (G.stun > 0 ? 0.45 : 1);
     player.position.z -= speed * dt;
     G.dist += speed * dt;
 
@@ -1551,9 +2137,51 @@ function loop() {
 
     updateGates(dt);
     updateObstacles(dt);
+    updateCollectibles(dt);
+    checkMilestones();
     checkCollisions();
     checkObstacles();
     updateEconomy(dt);
+
+    // Active Power-ups Countdown & Visuals
+    if (G.magnetTimer > 0) {
+      G.magnetTimer = Math.max(0, G.magnetTimer - dt);
+      $('badgeMagnet').classList.remove('hidden');
+      $('magTime').textContent = G.magnetTimer.toFixed(1) + 's';
+      playerMagnetRing.visible = true;
+      playerMagnetRing.scale.setScalar(1.0 + 0.22 * Math.sin(t * 14));
+    } else {
+      $('badgeMagnet').classList.add('hidden');
+      playerMagnetRing.visible = false;
+    }
+
+    if (G.shieldActive) {
+      $('badgeShield').classList.remove('hidden');
+      playerShield.visible = true;
+      playerShield.rotation.y += dt * 2.2;
+      playerShield.rotation.x += dt * 1.4;
+      playerShield.material.opacity = 0.35 + 0.15 * Math.sin(t * 6);
+    } else {
+      $('badgeShield').classList.add('hidden');
+      playerShield.visible = false;
+    }
+
+    if (G.boostTimer > 0) {
+      G.boostTimer = Math.max(0, G.boostTimer - dt);
+      $('badgeBoost').classList.remove('hidden');
+      $('boostTime').textContent = G.boostTimer.toFixed(1) + 's';
+      G.cashMultiplier = 2;
+    } else {
+      $('badgeBoost').classList.add('hidden');
+      G.cashMultiplier = 1;
+    }
+
+    // Dynamic Camera FOV kick during boost
+    const targetFov = G.boostTimer > 0 ? 68 : 60;
+    if (Math.abs(camera.fov - targetFov) > 0.05) {
+      camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 6);
+      camera.updateProjectionMatrix();
+    }
 
     const tg = camRunnerTarget();
     camera.position.lerp(tg.pos, Math.min(1, dt * 8));
@@ -1566,24 +2194,69 @@ function loop() {
     }
     updateWorld(player.position.z);
 
-    // Dynamic Time-of-Day Lighting Transition
-    if (G.time < 35) {
-      scene.background.set(0x7fd6ff); scene.fog.color.set(0x7fd6ff);
-    } else if (G.time < 75) {
-      scene.background.set(0xf5bb7d); scene.fog.color.set(0xf5bb7d);
+    // Difficulty Tiers: Day (0-450m) → Sunset (450-950m) → Night (950-1500m) → Neon Cyberpunk (1500m+)
+    let tierIdx = 1;
+    let tierName = 'DAY';
+    const targetBg = new THREE.Color();
+    const targetFog = new THREE.Color();
+    const targetSun = new THREE.Color();
+    const targetHemiSky = new THREE.Color();
+    const targetHemiGround = new THREE.Color();
+    let targetSunInt = 1.5;
+
+    if (G.dist < 450) {
+      tierIdx = 1; tierName = 'DAY';
+      targetBg.set(0x7fd6ff); targetFog.set(0x7fd6ff); targetSun.set(0xfff0d0); targetSunInt = 1.5;
+      targetHemiSky.set(0xcfe3ff); targetHemiGround.set(0x4a3d55);
+    } else if (G.dist < 950) {
+      tierIdx = 2; tierName = 'SUNSET';
+      targetBg.set(0xf39c12); targetFog.set(0xdf7a28); targetSun.set(0xff8833); targetSunInt = 1.7;
+      targetHemiSky.set(0xffbb77); targetHemiGround.set(0x6a3045);
+    } else if (G.dist < 1500) {
+      tierIdx = 3; tierName = 'NIGHT';
+      targetBg.set(0x0c1224); targetFog.set(0x101a30); targetSun.set(0x7799cc); targetSunInt = 1.1;
+      targetHemiSky.set(0x334466); targetHemiGround.set(0x151822);
     } else {
-      scene.background.set(0x382252); scene.fog.color.set(0x382252);
+      tierIdx = 4; tierName = 'NEON CYBERPUNK';
+      targetBg.set(0x130424); targetFog.set(0x240638); targetSun.set(0xff0099); targetSunInt = 1.8;
+      targetHemiSky.set(0x00f0ff); targetHemiGround.set(0xff007f);
     }
+
+    if (tierIdx !== G.currentTier) {
+      G.currentTier = tierIdx;
+      const tierAnnounce = [
+        '',
+        '',
+        '🌆 TIER 2: SUNSET SURGE! Obstacles Speeding Up! 🌅',
+        '🌃 TIER 3: MIDNIGHT RUN! Market Volatility Surging! 🌙',
+        '⚡ TIER 4: NEON CYBERPUNK! Hyper-Scale Mode! 🚀'
+      ];
+      if (tierAnnounce[tierIdx]) {
+        toast(tierAnnounce[tierIdx], tierIdx === 2 ? '#f39c12' : tierIdx === 3 ? '#85a5ff' : '#ff00ea');
+        AudioEngine.fanfare();
+      }
+    }
+
+    scene.background.lerp(targetBg, Math.min(1, dt * 2.5));
+    scene.fog.color.lerp(targetFog, Math.min(1, dt * 2.5));
+    sun.color.lerp(targetSun, Math.min(1, dt * 2.5));
+    sun.intensity += (targetSunInt - sun.intensity) * Math.min(1, dt * 2.5);
+    hemiLight.color.lerp(targetHemiSky, Math.min(1, dt * 2.5));
+    hemiLight.groundColor.lerp(targetHemiGround, Math.min(1, dt * 2.5));
 
     // Real-Time HUD Updates
     $('bal').textContent = fmt(G.balance);
     $('bal').classList.toggle('low', G.balance < 15000);
-    $('timer').textContent = 'SURVIVAL TIME: ' + mmss(G.time);
+    $('timer').textContent = `SURVIVAL: ${mmss(G.time)} / ${mmss(CFG.maxTime)}`;
     $('burnVal').textContent = '-' + fmt(G.burnNow) + '/s BURN';
     $('incomeVal').textContent = G.income ? `+${fmt(G.income)}/s REV` : '+0/s REV';
-    $('hudSub').textContent = `SPEED x${G.speedMult.toFixed(2)} • DIST ${Math.round(G.dist)}m`;
+    $('hudSub').textContent = `[TIER ${G.currentTier}: ${tierName}] SPEED x${(G.speedMult * boostMult).toFixed(2)} • DIST ${Math.round(G.dist)}m`;
 
-    if (G.balance <= 0) gameOver();
+    if (G.time >= CFG.maxTime) {
+      gameOver(true); // 10 minutes maximum play time reached -> Unicorn IPO Victory!
+    } else if (G.balance <= 0) {
+      gameOver(false); // Bankrupt!
+    }
   } else if (G.phase === 'over') {
     player.position.z -= 2 * dt;
   }
